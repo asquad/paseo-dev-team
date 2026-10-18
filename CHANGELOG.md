@@ -16,6 +16,10 @@
   coordinator turn, safe GitHub create retries.
 - Removed the Codex-only team preset.
 - Added cross-platform installer with update, uninstall and legacy migration.
+  It refuses to run from a clone inside a skills folder, so upgrading from
+  `pr-ready` starts from a fresh clone.
+- Issue mode works only on branches and PRs it creates (or the user's own),
+  and a repository settings file can turn publication off but not on.
 
 ## 2026-10-07
 
