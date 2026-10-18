@@ -12,8 +12,9 @@ merge-ready pull request. One command, `/deliver`, accepts an issue or a PR:
   fixes independently verified, checks green.
 
 You get a short report in the Paseo chat after every stage and one status
-comment on the PR that ends with the final score and result. It never merges,
-approves, or posts other comments unless you ask.
+comment on the PR that ends with the final score and result. It never merges
+or approves, and posts no other comments (apart from a link comment on the
+issue in issue mode) unless you ask.
 
 ## What is included
 
@@ -128,13 +129,19 @@ run-specific instructions such as `no-post`, `local-only`, `no-push`,
 What it does on GitHub with each launch:
 
 - **PR:** pushes fixes to the PR branch and keeps one status comment on the PR.
-- **Issue:** creates one branch, pushes it, opens one PR (draft by default) with
-  `Closes #N`, keeps the status comment on that PR, posts one short link
-  comment on the issue, and marks the PR ready once the gates pass.
+- **Issue:** creates one new branch, pushes it, opens one PR (draft by default)
+  with `Closes #N` (or `Refs #N` when it covers only part of the issue), keeps
+  the status comment on that PR, posts one short link comment on the issue,
+  and marks the PR ready once the gates pass. If an open PR for the issue
+  already exists and you did not author it, or you cannot push to the
+  repository, the run stops and asks. It does not push to an existing branch
+  it did not create unless you tell it to deliver on that PR.
 
 Merging, approving, enabling auto-merge, resolving threads and any other comment
-always need your explicit request. If the issue is unclear, the run stops and
-asks before writing code.
+always need your explicit request. If marking the PR ready would let
+repository automation merge it without an approving review, the PR stays in
+draft and the run asks. If the issue is unclear, the run stops and asks before
+writing code.
 
 A round uses about five agents (two reviewers, the critic, the developer, and
 sometimes the scout) besides the coordinator, so a run costs noticeably more than
