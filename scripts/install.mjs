@@ -134,6 +134,10 @@ function skillTargets() {
   const candidates = [path.join(home, ".agents", "skills"), path.join(home, ".claude", "skills")];
   const seen = new Map();
   for (const dir of candidates) {
+    if (lstatOrNull(dir)?.isSymbolicLink() && !realpathOrNull(dir)) {
+      warn(`${dir} is a link to a missing folder; skipped (fix or remove that link yourself)`);
+      continue;
+    }
     const real = realpathOrNull(dir) ?? dir;
     const key = isWindows ? real.toLowerCase() : real;
     if (seen.has(key)) {
@@ -150,10 +154,15 @@ function samePath(a, b) {
   return isWindows ? a.toLowerCase() === b.toLowerCase() : a === b;
 }
 
-function linkSkills() {
+function isInside(child, parent) {
+  const rel = isWindows ? path.relative(parent.toLowerCase(), child.toLowerCase()) : path.relative(parent, child);
+  return rel === "" || (rel.split(path.sep)[0] !== ".." && !path.isAbsolute(rel));
+}
+
+function linkSkills(targets) {
   log("Skills");
   const names = skillNames();
-  for (const targetDir of skillTargets()) {
+  for (const targetDir of targets) {
     if (!fs.existsSync(targetDir)) {
       act(`create ${targetDir}`, () => fs.mkdirSync(targetDir, { recursive: true }));
     }
@@ -199,10 +208,10 @@ function linkSkills() {
   }
 }
 
-function unlinkSkills() {
+function unlinkSkills(targets) {
   log("Skills");
   const names = new Set(skillNames());
-  for (const targetDir of skillTargets()) {
+  for (const targetDir of targets) {
     for (const name of names) {
       const dest = path.join(targetDir, name);
       const stat = lstatOrNull(dest);
@@ -246,18 +255,45 @@ function upsertBlock(text, block) {
   return text.trim() ? `${block}\n\n${text.replace(/^\s+/, "")}` : block;
 }
 
-function updatePaseoConfig() {
+function preflight() {
+  const targets = skillTargets();
+  if (!opts.uninstall) {
+    const repoReal = realpathOrNull(repoRoot) ?? repoRoot;
+    for (const dir of targets) {
+      const real = realpathOrNull(dir);
+      if (real && isInside(repoReal, real)) {
+        throw new Error(
+          `this clone (${repoReal}) is inside the skills folder ${dir}, so installing could move or shadow it. ` +
+            "Commit and push any work in it, clone the repository outside the skills folders and run the " +
+            "installer from that clone (README: Upgrading from pr-ready). Nothing was changed.",
+        );
+      }
+    }
+  }
+  const state = { targets };
+  if (opts.skillsOnly) return state;
+  state.team = loadTeam();
+  if (opts.prompt && !opts.uninstall) state.prompt = loadPrompt();
+  state.configPath = path.join(opts.paseoHome, "config.json");
+  if (fs.existsSync(state.configPath)) {
+    state.original = fs.readFileSync(state.configPath, "utf8");
+    try {
+      state.config = JSON.parse(state.original.replace(/^﻿/, ""));
+    } catch (err) {
+      throw new Error(`${state.configPath} is not valid JSON (${err.message}). Nothing was changed.`);
+    }
+  }
+  return state;
+}
+
+function updatePaseoConfig({ team, prompt, configPath, original, config }) {
   log(`Paseo config (${opts.paseoHome})`);
-  const configPath = path.join(opts.paseoHome, "config.json");
-  if (!fs.existsSync(configPath)) {
+  if (!config) {
     warn(`${configPath} not found; start Paseo once, then run the installer again`);
     return false;
   }
-  const original = fs.readFileSync(configPath, "utf8");
-  const config = JSON.parse(original.replace(/^﻿/, ""));
   config.daemon ??= {};
   const daemon = config.daemon;
-  const team = loadTeam();
   const teamIds = new Set(team.profiles.map((p) => p.id));
   let profiles = Array.isArray(daemon.agentProfiles) ? daemon.agentProfiles : [];
 
@@ -309,7 +345,7 @@ function updatePaseoConfig() {
       } else if (text.includes(LEGACY_PROMPT_BEGIN)) {
         warn("a legacy [Shared Paseo orchestration] block is in appendSystemPrompt; it conflicts with this one (use --replace-legacy)");
       }
-      const updated = upsertBlock(text, loadPrompt());
+      const updated = upsertBlock(text, prompt);
       if (updated !== text) log("  write orchestration prompt block");
       text = updated;
     }
@@ -350,9 +386,10 @@ function reloadPaseo() {
 
 try {
   log(`paseo-dev-team ${opts.uninstall ? "uninstall" : "install"} from ${repoRoot}${opts.dryRun ? " (dry run)" : ""}`);
-  if (opts.uninstall) unlinkSkills();
-  else linkSkills();
-  if (!opts.skillsOnly && updatePaseoConfig()) reloadPaseo();
+  const state = preflight();
+  if (opts.uninstall) unlinkSkills(state.targets);
+  else linkSkills(state.targets);
+  if (!opts.skillsOnly && updatePaseoConfig(state)) reloadPaseo();
   if (!opts.uninstall) {
     log(`Personal settings: ${path.join(home, ".config", "paseo-dev-team", "config.json")} (optional, see README)`);
   }
