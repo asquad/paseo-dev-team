@@ -50,22 +50,38 @@ role in Paseo without editing the skills. Updates keep your model choices.
 
 ## Install
 
+macOS, Linux:
+
 ```sh
 git clone git@github.com:asquad/paseo-dev-team.git ~/src/paseo-dev-team
 cd ~/src/paseo-dev-team
-./install.sh            # macOS, Linux
-.\install.ps1           # Windows PowerShell
+./install.sh
 ```
 
+Windows PowerShell:
+
+```powershell
+git clone git@github.com:asquad/paseo-dev-team.git "$HOME\src\paseo-dev-team"
+cd "$HOME\src\paseo-dev-team"
+.\install.ps1
+```
+
+If PowerShell reports that running scripts is disabled, use
+`powershell -ExecutionPolicy Bypass -File .\install.ps1` or
+`node scripts\install.mjs` instead.
+
 Keep the clone where it is: the installed skills are links into it. Put it
-anywhere except inside a skills folder.
+anywhere except inside a skills folder; the installer refuses to run from
+there.
 
 The installer:
 
 1. Links `deliver`, `pr-review` and `paseo-team` into `~/.agents/skills` (Codex,
-   Paseo) and `~/.claude/skills` (Claude Code). It never deletes folders; an
-   existing folder with the same name is skipped unless you pass
-   `--backup-conflicts`, which moves it to `~/.paseo-dev-team/backups/`.
+   Paseo) and `~/.claude/skills` (Claude Code). It never deletes folders or
+   links. An existing folder, or a link that leads elsewhere, with the same
+   name is skipped unless you pass `--backup-conflicts`, which moves it to
+   `~/.paseo-dev-team/backups/`. Links into a moved or another paseo-dev-team
+   clone are re-pointed to this one.
 2. Adds the team profiles to `~/.paseo/config.json` and writes the team block
    into Paseo's appended system prompt, leaving your other profiles and prompt
    text alone. The previous config is saved next to it as
@@ -75,15 +91,22 @@ The installer:
 Preview with `--dry-run`. All options: `./install.sh --help`.
 
 **Update:** `git pull`, then run the installer again. Profile notes are
-refreshed; your provider, model and thinking settings are kept unless you pass
-`--reset-profiles`.
+refreshed; your launch settings (provider, model, mode, thinking, feature
+values) are kept unless you pass `--reset-profiles`.
 
 **Uninstall:** run the installer with `--uninstall`. It removes only the links
 that point into this clone, the team profiles and the team prompt block.
 
-**Upgrading from pr-ready:** run the installer once with `--replace-legacy
---backup-conflicts`. It moves the old `pr-ready`, `pr-review` and `paseo-team`
-folders to the backups, removes the old `Mixed / …` (`shared-*`) profiles and the
+**Upgrading from pr-ready:** the old setup is a clone inside the skills
+folder (`~/.agents/skills/pr-ready`), so do not pull and install there:
+
+1. Commit and push any work in the old `~/.agents/skills/pr-ready` clone.
+2. Clone the repository elsewhere, as in Install above.
+3. From the new clone, run the installer once with `--replace-legacy
+   --backup-conflicts`.
+
+It moves the old `pr-ready`, `pr-review` and `paseo-team` folders to the
+backups, removes the old `Mixed / …` (`shared-*`) profiles and the
 `[Shared Paseo orchestration]` prompt block. Old `pr-ready-status` comments on
 PRs are still recognized when resuming.
 
