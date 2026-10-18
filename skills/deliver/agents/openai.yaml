@@ -1,4 +1,4 @@
 interface:
-  display_name: "PR Ready"
-  short_description: "Prepare pull requests through an agent review loop"
-  default_prompt: "Use $pr-ready to bring this PR to merge readiness through reviewer, critic, and developer subagents, with a short report after every stage."
+  display_name: "Deliver"
+  short_description: "Take an issue or PR to a merge-ready PR with an agent team"
+  default_prompt: "Use $deliver to take this issue or PR to a merge-ready pull request through planner, developer, reviewer and critic subagents, with a short report after every stage."
