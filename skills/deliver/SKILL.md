@@ -159,9 +159,9 @@ internal agent messages alone do not count as a chat report.
   paths, tests, and relevant project conventions. Return concrete findings with
   Finding IDs, evidence and calibrated ratings, plus coverage and verification
   limits. They
-  do not edit code or publish reviews. Split a large PR into complementary scopes
-  when useful; one reviewer suffices for a small PR. The coordinator owns complete
-  coverage, including interactions between scopes.
+  do not edit code or publish reviews. For a large PR, complementary scoped
+  reviews (reviewers `C`, `D`) may be added on top of the two full reviews. The
+  coordinator owns complete coverage, including interactions between scopes.
 - **Critics:** Independently inspect the evidence behind each finding and the
   proposed remedy. Look for false positives, misunderstood contracts, unnecessary
   scope growth, and regressions the remedy might introduce. Return `accept`,
