@@ -1,43 +1,77 @@
 ---
 name: paseo-team
-description: Select the mixed Claude/Codex or Codex-only team preset for a Paseo task and route roles through saved profiles. Use for Team mixed/codex requests or when combining a team preset with pr-ready or another workflow.
+description: Route the roles of a Paseo agent team (coordinator, developer, two reviewers, scout, expert/critic) through the saved paseo-dev-team profiles. Use when delegating development, review or research to Paseo agents, or when combining the team with deliver or another workflow.
 ---
 
 # Paseo Team
 
-Select a team for the current task, then execute the user's requested workflow through Paseo. This skill changes role routing, not the workflow or its authorization. Arguments may be supplied as /paseo-team codex pr-ready <PR URL>, $paseo-team mixed <task>, or plain Team: codex. Use pr-ready for <PR URL>.
+Run the user's requested workflow through Paseo agents with fixed roles. This
+skill changes role routing, not the workflow or its authorization. A role
+selection alone does not authorize code changes, GitHub publication, merges or
+running a task without a target.
 
-## Select a preset
+## Profiles
 
-- mixed: the user's Fable coordinator, Opus developer, Astra and Fable reviewers, Sonnet scout and Fable expert.
-- codex: Codex for every role, including coordinator, scout and critic/expert. Both reviewers are separate Astra agents.
-- Use the explicit preset in the latest user instruction, then the already selected task preset. For a new task without a selection, retain the historical mixed default. Do not infer selection from profile names you cannot observe or guess your own model.
-- State the selected preset briefly and propagate Team: mixed or Team: codex in each worker assignment and handoff. A worker's role remains bounded; loading this skill does not make every worker a coordinator.
-- Never alter the host default, existing profiles, provider availability or unrelated tasks merely to select a preset. In codex, do not fall back to Claude if a profile is unavailable.
+Call `list_profiles` and read the notes. Resolve each role by its profile `id`;
+display names and models may change.
 
-## Coordinator and switching
-
-For a fully Codex task, the user starts a new agent with **Codex / Coordinator — Astra** and supplies Team: codex. For Mixed, use **Mixed / Coordinator — Fable 5.1** with Team: mixed. Selecting a profile only applies its provider/model/mode/thinking settings; profile notes are not an injected role prompt.
-
-Changing the task preset affects future delegations. It cannot change the provider of the current conversation or retroactively move running agents. Do not claim a Claude session has become Codex-only. If the current coordinator is confirmed to be the wrong provider, prepare a compact handoff containing the goal, selected preset, workspace, candidate/base revisions, authorizations, findings, checks and active worker IDs, and direct the user to start the matching coordinator with that briefing. An explicit request for an actual Paseo handoff can use the shared paseo-handoff skill. Preserve completed work and avoid duplicate workers; do not silently interrupt active workers. For a new task with the correct coordinator, begin without asking for confirmation.
-
-## Resolve saved profiles
-
-Call list_profiles and read the notes. Use these exact profiles for the selected preset; their live fields are the source of truth for launch settings.
-
-| Role | Mixed profile | Codex profile |
+| Role | Profile id | Purpose |
 |---|---|---|
-| Coordinator | Mixed / Coordinator — Fable 5.1 | Codex / Coordinator — Astra |
-| Developer | Mixed / Developer — Opus 5 | Codex / Developer — Astra |
-| Reviewer A | Mixed / Reviewer A — Astra | Codex / Reviewer A — Astra |
-| Reviewer B | Mixed / Reviewer B — Fable 5.1 | Codex / Reviewer B — Astra |
-| Scout | Mixed / Scout — Sonnet 5 | Codex / Scout — Astra |
-| Expert | Mixed / Expert — Fable 5.1 | Codex / Expert — Astra |
+| Coordinator | `team-coordinator` | Plans, delegates, integrates, owns shared Git operations and final verification. |
+| Developer | `team-developer` | Implements assigned changes and tests. |
+| Reviewer A | `team-reviewer-a` | Independent reviewer. |
+| Reviewer B | `team-reviewer-b` | Second independent reviewer, normally on a different provider than A. |
+| Scout | `team-scout` | Bounded research questions. |
+| Expert | `team-expert` | Advice on hard questions; the Critic in deliver. |
 
-Read the sibling ../paseo/SKILL.md for the current tool interface. There is no profile parameter on create_agent: materialize provider/model, modeId, thinkingOptionId and featureValues into provider and settings. Include the actual role, context, file ownership or worktree, acceptance criteria and output format in initialPrompt. If a required profile is missing, report which one rather than guessing or mixing presets.
+Read the sibling `../paseo/SKILL.md` for the current tool interface. There is
+no profile parameter on `create_agent`: copy the profile's provider, model,
+`modeId`, `thinkingOptionId` and `featureValues` into the launch settings. Put
+the actual role, task, context, file ownership or worktree, acceptance criteria,
+allowed writes and output format into `initialPrompt`; profile notes are not
+injected into the agent. If a profile is missing, name the missing id and point
+the user to the paseo-dev-team installer instead of guessing a substitute.
 
-## Preserve the requested pipeline
+A profile only applies at launch. It cannot change the provider or model of the
+current conversation. If the current coordinator does not match
+`team-coordinator`, prepare a compact handoff (goal, workspace, base and
+candidate revisions, authorizations, findings, checks, active worker ids) and
+direct the user to start a coordinator with that profile; an explicit request
+for a Paseo handoff can use the paseo-handoff skill. Do not interrupt active
+workers or claim a switch that did not happen.
 
-For PR readiness, read sibling ../pr-ready/SKILL.md and give reviewers sibling ../pr-review/SKILL.md. Follow pr-ready's review → critique → accepted fixes → checks → re-review → remote verification cycle and its completion gates. Use BOTH selected reviewer profiles on the same frozen candidate, even when a generic workflow would allow one. Keep initial reviews independent; collect both reports, then assign the selected Expert profile as Critic in a separate session. It examines findings, remedies and coverage, including clean reviews. The coordinator resolves disputes through evidence. The selected Developer handles accepted changes, and Scout handles bounded investigations as needed.
+## Team rules
 
-For other tasks, keep the workflow appropriate to the request; do not turn every task into pr-ready. Team review still uses both reviewers when review is part of the requested team workflow. Keep at most two active workers by default, apart from the coordinator; additional independent work may justify more. Only the coordinator performs shared Git operations. Workers do not redelegate unless assigned. Use completion notifications rather than polling. A preset selection alone does not authorize code changes, GitHub publication, merges or running a PR task without a target.
+- Reviews use BOTH reviewers as separate agents on the same frozen candidate,
+  with the same requirements and no access to each other's initial findings or a
+  desired verdict. Collect both reports, then give findings to the Expert as
+  Critic in a separate session. The coordinator resolves disputes through
+  evidence and never substitutes self-review.
+- Reviewer, Scout and Expert assignments do not authorize source edits. State
+  that in the prompt and use a read-only mode where the provider has one; notes
+  alone are not a sandbox.
+- Keep at most two active workers apart from the coordinator by default
+  (deliver reads `maxActiveWorkers` from its config). Prefer parallel reading;
+  give concurrent developers disjoint files or separate worktrees.
+- Only the coordinator performs shared Git operations. Workers do not redelegate
+  unless assigned.
+- For PR readiness or issue delivery, follow sibling `../deliver/SKILL.md` and
+  give reviewers sibling `../pr-review/SKILL.md`. For other tasks keep the
+  workflow appropriate to the request; do not turn every task into deliver.
+
+## Waiting and messaging
+
+- While workers or CI are running, the coordinator does not end its turn. Wait
+  inside the turn with bounded steps (agent status/activity, an expected handoff
+  file, check polling a few minutes at a time) and short progress notes. End the
+  turn only with the final report or a concrete question for the user. A turn
+  that resumes on its own later does not notify the parent chat.
+- Ask workers to write their final handoff to a known file and to run long
+  checks in the foreground, finishing only with the final handoff. If a worker
+  finishes while saying it is still waiting on something, start a bounded wait
+  for its real handoff immediately; a self-resumed worker does not send a second
+  finish notification.
+- Sending a prompt to a running agent replaces its current turn. Prefer sending
+  notes to idle agents. For a running agent phrase the note as a continuation
+  ("this is not a stop; continue from where you are and also take X into
+  account") and check afterwards that it resumed.
