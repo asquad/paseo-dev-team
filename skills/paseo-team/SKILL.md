@@ -24,8 +24,10 @@ display names and models may change.
 | Scout | `team-scout` | Bounded research questions. |
 | Expert | `team-expert` | Advice on hard questions; the Critic in deliver. |
 
-Read the sibling `../paseo/SKILL.md` for the current tool interface. There is
-no profile parameter on `create_agent`: copy the profile's provider, model,
+Read the installed `paseo` skill for the current tool interface: find it in the
+skill catalog (Paseo installs it at `~/.agents/skills/paseo/SKILL.md`). If it
+is missing, report the missing dependency rather than guessing the interface.
+There is no profile parameter on `create_agent`: copy the profile's provider, model,
 `modeId`, `thinkingOptionId` and `featureValues` into the launch settings. Put
 the actual role, task, context, file ownership or worktree, acceptance criteria,
 allowed writes and output format into `initialPrompt`; profile notes are not

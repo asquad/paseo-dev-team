@@ -19,7 +19,7 @@ findings. A clean review with a useful explanation is a complete result.
 
 Shared by Claude Code and Codex; adapted from `asquad/claude-pr-review` (archived),
 revision `74150e62d05cfcae13b7955d169d425b9e3d302e`. The upstream MIT notice is
-preserved in [LICENSE](LICENSE).
+preserved in the repository [LICENSE](../../LICENSE).
 
 ## Defaults and authorization
 
