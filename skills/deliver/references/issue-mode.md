@@ -18,10 +18,6 @@ Everything listed as needing separate authorization in `SKILL.md` still does.
 - Read the issue body, all comments, labels, milestone, assignees and linked
   items. Read repository instructions for branch names, commit messages, PR
   titles and bodies, labels and the base branch.
-- Check that the authenticated `gh` user can push to the repository:
-  `gh repo view --json viewerPermission` must be `WRITE`, `MAINTAIN` or
-  `ADMIN`. Otherwise stop and ask before planning. Do not fork or push to
-  another remote without the user's explicit approval.
 - Look for existing work: open PRs that reference or close the issue, and
   branches named after it.
   - If an open PR addresses the issue and its author is the authenticated `gh`
@@ -31,8 +27,13 @@ Everything listed as needing separate authorization in `SKILL.md` still does.
   - If its author is anyone else, including a bot, stop and ask with these
     options: deliver on that PR (pushes to its branch and posts the status
     comment there), review it only (nothing is published), or stop.
-  - Never push to an existing branch this run did not create (per its round
-    log); choose a fresh branch name instead.
+  - Apart from a PR continued or adopted under the two rules above, never
+    push to an existing branch this run did not create (per its round log);
+    choose a fresh branch name instead.
+- When no existing PR is continued, check that the authenticated `gh` user can
+  push to the repository: `gh repo view --json viewerPermission` must be
+  `WRITE`, `MAINTAIN` or `ADMIN`. Otherwise stop and ask before planning. Do
+  not fork or push to another remote without the user's explicit approval.
 - If the issue is closed, or assigned to someone else with recent activity,
   stop and ask.
 - Record the base branch (`issue.baseBranch`) and its SHA.
