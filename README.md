@@ -78,8 +78,10 @@ there.
 The installer:
 
 1. Links `deliver`, `pr-review` and `paseo-team` into `~/.agents/skills` (Codex,
-   Paseo) and `~/.claude/skills` (Claude Code). It never deletes folders or
-   links. An existing folder, or a link that leads elsewhere, with the same
+   Paseo) and `~/.claude/skills` (Claude Code). It never deletes folders,
+   and only removes or re-points links it manages (its own, links into another
+   paseo-dev-team clone, and a legacy `pr-ready` link with `--replace-legacy`).
+   An existing folder, or a link that leads elsewhere, with the same
    name is skipped unless you pass `--backup-conflicts`, which moves it to
    `~/.paseo-dev-team/backups/`. Links into a moved or another paseo-dev-team
    clone are re-pointed to this one.
