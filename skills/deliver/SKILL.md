@@ -229,8 +229,9 @@ preserve them during integration and branch updates. Respect no-commit constrain
    the verified source branch. If someone has updated it, reconcile their changes
    before proceeding and re-review the integrated result. Verify that the PR head
    matches the candidate, then inspect checks for that SHA and current merge
-   requirements. Wait for the checks selected by `config.ci.wait`, excluding
-   names matching `config.ci.skipChecks`; report excluded checks as pending or
+   requirements. Wait for the checks selected by `config.ci.wait` (for
+   `required`, the checks GitHub marks required, or all checks when none are or
+   that cannot be determined), excluding names matching `config.ci.skipChecks`; report excluded checks as pending or
    skipped, never as passed. For normally progressing pending CI, wait within the active
    task using bounded calls and short progress reports; do not finish just because
    only CI remains. Pending CI is not success. Any new fix, conflict resolution,
@@ -255,7 +256,8 @@ references/status-comment.md. Skip edits for unchanged polls.
 Include the useful evidence for that stage, without pasting raw agent transcripts:
 
 - Baseline: PR/revision, scope, existing blockers, planned role assignments,
-  and effective configuration values that differ from the defaults.
+  and effective configuration values that differ from the defaults, with their
+  source.
 - Issue intake, requirements and plan (issue mode): acceptance criteria,
   open decisions or assumptions, plan verdict from the Critic.
 - PR opened (issue mode): PR link, branch, base, draft state, first candidate.

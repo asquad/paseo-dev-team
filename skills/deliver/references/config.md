@@ -1,7 +1,8 @@
 # Configuration
 
 Resolve the run configuration once, during the baseline, and record the
-effective values and their sources in the round log.
+effective values and their sources in the round log. Do not re-read the files
+later in the run.
 
 ## Sources and precedence
 
@@ -12,10 +13,15 @@ replace:
 2. The user file: `$PASEO_DEV_TEAM_CONFIG` when set, otherwise
    `~/.config/paseo-dev-team/config.json` on every OS (on Windows
    `%USERPROFILE%\.config\paseo-dev-team\config.json`).
-3. The target repository file `.paseo-dev-team.json` at the root of the
-   checked-out base revision. Read it from the base, not from the PR head, so a
-   PR cannot relax its own gates. It may tighten or relax values for that
-   repository only.
+3. The target repository file `.paseo-dev-team.json` at the repository root.
+   In PR mode read it from the PR's base revision, not from the PR head, so a
+   PR cannot relax its own gates. In issue mode read it at intake from the head
+   of the repository's default branch and record that SHA; a different
+   `issue.baseBranch` does not cause a second read. It may tighten or relax
+   gate values for that repository only. For `statusComment`,
+   `issue.linkComment`, `issue.prState` and `issue.markReadyWhenDone` it can
+   only reduce publication (`false`, or `draft`): it cannot enable what the
+   defaults and the user file leave off.
 4. Explicit instructions in the launch or later in the run, for example
    `no-post`, `local-only`, `target 9`, `base staging`, `ready PR`.
 
@@ -32,7 +38,7 @@ and ignored.
 | `blocker.importance` / `blocker.confidence` | `7` / `7` | An accepted finding at or above both values blocks merge. |
 | `maxActiveWorkers` | `2` | Active workers apart from the coordinator. |
 | `reviewLanguage` | `auto` | Language of GitHub text. `auto` follows pr-review's language rules. Chat always follows the user. |
-| `ci.wait` | `required` | Which remote checks to wait for: `required` (branch protection), `all`, or `none` (report pending checks without waiting). |
+| `ci.wait` | `required` | Which remote checks to wait for: `required` (the checks GitHub marks required for the PR, `gh pr checks <n> --required`; when there are none or they cannot be determined, behaves like `all`), `all`, or `none` (report pending checks without waiting). `ci.skipChecks` applies to each. |
 | `ci.skipChecks` | `[]` | Regular expressions matched against check names. Matching checks are not waited for and are reported as pending or skipped, never as passed. Example: `["^build-"]` for slow player builds. |
 | `followUpTests` | `affected` | After the first full local run, later rounds run tests for affected areas plus fast checks; `full` reruns everything. Report the revision of the last full run. |
 | `issue.baseBranch` | `repo-default` | Base for a new PR in issue mode. `repo-default` follows repository instructions, then the GitHub default branch. |
