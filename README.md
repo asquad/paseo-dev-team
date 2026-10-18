@@ -162,8 +162,11 @@ yourself, create `~/.config/paseo-dev-team/config.json` (the same path under
 ```
 
 A repository can add `.paseo-dev-team.json` at its root for repository-wide
-values, for example its base branch. Instructions in the launch override both.
-All keys are described in `skills/deliver/references/config.md`.
+values, for example its base branch. It is read from the PR's base (in issue
+mode, from the default branch). It can turn publication off (status comment,
+issue link comment, ready PRs) but never on against your settings.
+Instructions in the launch override both. All keys are described in
+`skills/deliver/references/config.md`.
 
 | Key | Default | Meaning |
 |---|---|---|
@@ -172,7 +175,7 @@ All keys are described in `skills/deliver/references/config.md`.
 | `blocker` | `7` / `7` | Importance and confidence at which a finding blocks merge. |
 | `maxActiveWorkers` | `2` | Parallel workers besides the coordinator. |
 | `reviewLanguage` | `auto` | Language of GitHub text. |
-| `ci.wait` | `required` | `required`, `all` or `none`. |
+| `ci.wait` | `required` | `required` (checks GitHub marks required; all checks if none are), `all` or `none`. |
 | `ci.skipChecks` | `[]` | Regexes of checks not to wait for (reported as not awaited). |
 | `followUpTests` | `affected` | Later rounds rerun only affected tests; `full` reruns all. |
 | `issue.baseBranch` | `repo-default` | Base for new PRs. |
