@@ -31,8 +31,9 @@ Options:
   --reset-profiles     Overwrite the launch settings (provider, model, mode,
                        thinking, feature values) of existing team profiles
                        with the shipped values.
-  --backup-conflicts   Move existing skill folders with the same names to
-                       ~/.paseo-dev-team/backups/<time>/ instead of skipping.
+  --backup-conflicts   Move existing skill folders or foreign links with the
+                       same names to ~/.paseo-dev-team/backups/<time>/
+                       instead of skipping.
   --replace-legacy     Also retire the pre-rename setup: move a pr-ready skill
                        folder to the backups, remove the old shared-* profiles
                        and the [Shared Paseo orchestration] prompt block.
@@ -160,6 +161,18 @@ function isInside(child, parent) {
   return rel === "" || (rel.split(path.sep)[0] !== ".." && !path.isAbsolute(rel));
 }
 
+function isTeamSkill(real, name) {
+  return (
+    samePath(path.basename(real), name) &&
+    samePath(path.basename(path.dirname(real)), "skills") &&
+    fs.existsSync(path.join(real, "..", "..", "scripts", "install.mjs"))
+  );
+}
+
+function link(source, dest) {
+  fs.symlinkSync(source, dest, isWindows ? "junction" : "dir");
+}
+
 function linkSkills(targets) {
   log("Skills");
   const names = skillNames();
@@ -172,23 +185,26 @@ function linkSkills(targets) {
       const dest = path.join(targetDir, name);
       const stat = lstatOrNull(dest);
       if (!stat) {
-        act(`link ${dest} -> ${source}`, () => fs.symlinkSync(source, dest, isWindows ? "junction" : "dir"));
+        act(`link ${dest} -> ${source}`, () => link(source, dest));
         continue;
       }
-      if (stat.isSymbolicLink() && samePath(realpathOrNull(dest), realpathOrNull(source))) {
+      const current = realpathOrNull(dest);
+      if (stat.isSymbolicLink() && samePath(current, realpathOrNull(source))) {
         log(`  ok ${dest}`);
         continue;
       }
-      if (stat.isSymbolicLink()) {
-        act(`relink ${dest} -> ${source}`, () => {
+      if (stat.isSymbolicLink() && (!current || isTeamSkill(current, name))) {
+        act(`relink ${dest} -> ${source} (was -> ${fs.readlinkSync(dest)})`, () => {
           fs.unlinkSync(dest);
-          fs.symlinkSync(source, dest, isWindows ? "junction" : "dir");
+          link(source, dest);
         });
         continue;
       }
       if (opts.backupConflicts) {
         moveToBackup(dest, path.basename(path.dirname(targetDir)));
-        act(`link ${dest} -> ${source}`, () => fs.symlinkSync(source, dest, isWindows ? "junction" : "dir"));
+        act(`link ${dest} -> ${source}`, () => link(source, dest));
+      } else if (stat.isSymbolicLink()) {
+        warn(`${dest} is a link to ${fs.readlinkSync(dest)}, not to this repo; skipped (use --backup-conflicts)`);
       } else {
         warn(`${dest} already exists and is not a link to this repo; skipped (use --backup-conflicts)`);
       }
