@@ -17,7 +17,7 @@ Make a PR understandable to the next human reviewer, then report concrete defect
 at the relevant lines. Support a first pass and a follow-up against earlier
 findings. A clean review with a useful explanation is a complete result.
 
-Shared by Claude Code and Codex; adapted from [asquad/claude-pr-review](https://github.com/asquad/claude-pr-review),
+Shared by Claude Code and Codex; adapted from `asquad/claude-pr-review` (archived),
 revision `74150e62d05cfcae13b7955d169d425b9e3d302e`. The upstream MIT notice is
 preserved in [LICENSE](LICENSE).
 
