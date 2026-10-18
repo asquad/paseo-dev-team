@@ -1,0 +1,166 @@
+# paseo-dev-team
+
+A ready-made Paseo agent team for taking GitHub work to a
+merge-ready pull request. One command, `/deliver`, accepts an issue or a PR:
+
+- **Issue:** reads it, settles the requirements, plans with a critic, implements
+  in a separate worktree, opens a PR, then runs the review loop below.
+- **PR:** two independent reviewers (Codex and Claude) review a frozen
+  candidate, an expert critic triages the findings, a developer fixes accepted
+  ones, checks run, and the loop repeats until the PR meets the gates: score at
+  or above the target (default 8/10 on the pr-review rubric), no open blockers,
+  fixes independently verified, checks green.
+
+You get a short report in the Paseo chat after every stage and one status
+comment on the PR that ends with the final score and result. It never merges,
+approves, or posts other comments unless you ask.
+
+## What is included
+
+| Path | Purpose |
+|---|---|
+| `skills/deliver` | The `/deliver` workflow (issue or PR → merge-ready PR). |
+| `skills/pr-review` | PR review with a calibrated 0-10 score and inline findings. Also usable alone: `/pr-review <PR URL>`. |
+| `skills/paseo-team` | Team roles and how to launch them in Paseo. |
+| `profiles/team.json` | The six Paseo agent profiles the team uses. |
+| `paseo/orchestration-prompt.md` | Team conventions added to Paseo's system prompt. |
+| `skills/deliver/config/defaults.json` | Default settings; override them personally or per repository. |
+
+### Team
+
+| Profile id | Role | Ships with |
+|---|---|---|
+| `team-coordinator` | Plans, delegates, integrates, owns Git | Claude Opus 5.5, medium |
+| `team-developer` | Implements changes and tests | Claude Opus 5.5, high |
+| `team-reviewer-a` | Independent reviewer | Codex GPT-6-Astra, high |
+| `team-reviewer-b` | Independent reviewer | Claude Opus 5.5, high |
+| `team-scout` | Bounded research | Claude Sonnet 5.5, medium |
+| `team-expert` | Critic and expert advice | Claude Opus 5.5, max |
+
+The skills refer to roles by profile id only, so you can change the model of any
+role in Paseo without editing the skills. Updates keep your model choices.
+
+## Requirements
+
+- Paseo desktop app, started at least once.
+- Claude and Codex providers signed in inside Paseo.
+- GitHub CLI signed in: `gh auth login` (the account that will push and comment).
+- Git. Node.js 18+ is used if present; otherwise the installer runs on the
+  runtime bundled with the Paseo app.
+
+## Install
+
+```sh
+git clone git@github.com:asquad/paseo-dev-team.git ~/src/paseo-dev-team
+cd ~/src/paseo-dev-team
+./install.sh            # macOS, Linux
+.\install.ps1           # Windows PowerShell
+```
+
+Keep the clone where it is: the installed skills are links into it. Put it
+anywhere except inside a skills folder.
+
+The installer:
+
+1. Links `deliver`, `pr-review` and `paseo-team` into `~/.agents/skills` (Codex,
+   Paseo) and `~/.claude/skills` (Claude Code). It never deletes folders; an
+   existing folder with the same name is skipped unless you pass
+   `--backup-conflicts`, which moves it to `~/.paseo-dev-team/backups/`.
+2. Adds the team profiles to `~/.paseo/config.json` and writes the team block
+   into Paseo's appended system prompt, leaving your other profiles and prompt
+   text alone. The previous config is saved next to it as
+   `config.json.bak-paseo-dev-team-<time>`.
+3. Runs `paseo reload`.
+
+Preview with `--dry-run`. All options: `./install.sh --help`.
+
+**Update:** `git pull`, then run the installer again. Profile notes are
+refreshed; your provider, model and thinking settings are kept unless you pass
+`--reset-profiles`.
+
+**Uninstall:** run the installer with `--uninstall`. It removes only the links
+that point into this clone, the team profiles and the team prompt block.
+
+**Upgrading from pr-ready:** run the installer once with `--replace-legacy
+--backup-conflicts`. It moves the old `pr-ready`, `pr-review` and `paseo-team`
+folders to the backups, removes the old `Mixed / …` (`shared-*`) profiles and the
+`[Shared Paseo orchestration]` prompt block. Old `pr-ready-status` comments on
+PRs are still recognized when resuming.
+
+## Use
+
+Start a Paseo agent with the **Team / Coordinator** profile in the repository you
+work on, then:
+
+```text
+/deliver https://github.com/OWNER/REPO/issues/123
+/deliver https://github.com/OWNER/REPO/pull/456
+/deliver https://github.com/OWNER/REPO/pull/456 target 9, no-post
+```
+
+In Codex use `$deliver …`. Plain words work too (`deliver #456`). You can add
+run-specific instructions such as `no-post`, `local-only`, `no-push`,
+`target 9`, `base staging` or `ready PR`.
+
+What it does on GitHub with each launch:
+
+- **PR:** pushes fixes to the PR branch and keeps one status comment on the PR.
+- **Issue:** creates one branch, pushes it, opens one PR (draft by default) with
+  `Closes #N`, keeps the status comment on that PR, posts one short link
+  comment on the issue, and marks the PR ready once the gates pass.
+
+Merging, approving, enabling auto-merge, resolving threads and any other comment
+always need your explicit request. If the issue is unclear, the run stops and
+asks before writing code.
+
+A round uses about five agents (two reviewers, the critic, the developer, and
+sometimes the scout) besides the coordinator, so a run costs noticeably more than
+a single agent.
+
+## Settings
+
+Defaults are in `skills/deliver/config/defaults.json`. To change them for
+yourself, create `~/.config/paseo-dev-team/config.json` (the same path under
+`%USERPROFILE%` on Windows) with only the keys you want to change:
+
+```json
+{
+  "scoreTarget": 8,
+  "ci": { "skipChecks": ["^build-"] },
+  "issue": { "prState": "ready" }
+}
+```
+
+A repository can add `.paseo-dev-team.json` at its root for repository-wide
+values, for example its base branch. Instructions in the launch override both.
+All keys are described in `skills/deliver/references/config.md`.
+
+| Key | Default | Meaning |
+|---|---|---|
+| `statusComment` | `true` | Keep one status comment on the PR. |
+| `scoreTarget` | `8` | Minimum final score (0-10). |
+| `blocker` | `7` / `7` | Importance and confidence at which a finding blocks merge. |
+| `maxActiveWorkers` | `2` | Parallel workers besides the coordinator. |
+| `reviewLanguage` | `auto` | Language of GitHub text. |
+| `ci.wait` | `required` | `required`, `all` or `none`. |
+| `ci.skipChecks` | `[]` | Regexes of checks not to wait for (reported as not awaited). |
+| `followUpTests` | `affected` | Later rounds rerun only affected tests; `full` reruns all. |
+| `issue.baseBranch` | `repo-default` | Base for new PRs. |
+| `issue.prState` | `draft` | State of a newly opened PR. |
+| `issue.markReadyWhenDone` | `true` | Mark the draft ready when the gates pass. |
+| `issue.planCritique` | `true` | Critic reviews the plan before coding. |
+| `issue.linkComment` | `true` | Comment on the issue with the PR link. |
+
+## Troubleshooting
+
+- **"profile team-… is missing":** run the installer again, then `paseo reload`.
+- **Skill not found in Claude Code or Codex:** check that
+  `~/.claude/skills/deliver` and `~/.agents/skills/deliver` exist and point into
+  this clone; restart the agent session.
+- **Installer cannot find a runtime on Linux:** install Node.js or set
+  `PASEO_DEV_TEAM_NODE` to a node executable. The Paseo runtime paths probed on
+  Linux (`/opt/Paseo/paseo`, `/usr/lib/paseo/paseo`) are guesses.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
