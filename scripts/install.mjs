@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const home = os.homedir();
 const isWindows = process.platform === "win32";
-const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\..*/, "");
+const stamp = new Date().toISOString().replace(/[-:.]/g, "");
 
 const PROMPT_BEGIN = "[paseo-dev-team orchestration]";
 const PROMPT_END = "[/paseo-dev-team orchestration]";
@@ -28,8 +28,9 @@ Options:
   --uninstall          Remove the links, team profiles and prompt block.
   --skills-only        Only link the skills.
   --no-prompt          Do not add the orchestration prompt block.
-  --reset-profiles     Overwrite provider, model and thinking settings of
-                       existing team profiles with the shipped values.
+  --reset-profiles     Overwrite the launch settings (provider, model, mode,
+                       thinking, feature values) of existing team profiles
+                       with the shipped values.
   --backup-conflicts   Move existing skill folders with the same names to
                        ~/.paseo-dev-team/backups/<time>/ instead of skipping.
   --replace-legacy     Also retire the pre-rename setup: move a pr-ready skill
@@ -310,11 +311,10 @@ function updatePaseoConfig({ team, prompt, configPath, original, config }) {
       }
       const existing = profiles[index];
       const merged = { ...existing, ...shipped };
-      if (!opts.resetProfiles) {
-        for (const key of LAUNCH_SETTINGS) {
-          if (key in existing) merged[key] = existing[key];
-          else if (!(key in shipped)) delete merged[key];
-        }
+      for (const key of LAUNCH_SETTINGS) {
+        if (!opts.resetProfiles && key in existing) merged[key] = existing[key];
+        else if (key in shipped) merged[key] = shipped[key];
+        else delete merged[key];
       }
       if (JSON.stringify(merged) !== JSON.stringify(existing)) {
         log(`  update profile ${shipped.id}${opts.resetProfiles ? " (settings reset)" : " (keeping your launch settings)"}`);
@@ -359,10 +359,16 @@ function updatePaseoConfig({ team, prompt, configPath, original, config }) {
     return false;
   }
   const backup = `${configPath}.bak-paseo-dev-team-${stamp}`;
-  act(`back up config to ${backup}`, () => fs.copyFileSync(configPath, backup));
+  act(`back up config to ${backup}`, () => fs.copyFileSync(configPath, backup, fs.constants.COPYFILE_EXCL));
   act(`write ${configPath}`, () => {
     const tmp = `${configPath}.tmp-paseo-dev-team`;
-    fs.writeFileSync(tmp, output, { encoding: "utf8" });
+    if (isWindows) {
+      fs.writeFileSync(tmp, output, { encoding: "utf8" });
+    } else {
+      const mode = fs.statSync(configPath).mode & 0o777;
+      fs.writeFileSync(tmp, output, { encoding: "utf8", mode });
+      fs.chmodSync(tmp, mode);
+    }
     fs.renameSync(tmp, configPath);
   });
   return true;
