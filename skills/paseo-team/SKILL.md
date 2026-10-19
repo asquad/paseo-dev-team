@@ -13,7 +13,9 @@ running a task without a target.
 ## Profiles
 
 Call `list_profiles` and read the notes. Resolve each role by its profile `id`;
-display names and models may change.
+display names, providers and models may change. Users can assign any provider
+Paseo supports to any role, so do not assume a provider, mode or capability
+from the role name.
 
 | Role | Profile id | Purpose |
 |---|---|---|
