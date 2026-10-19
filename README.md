@@ -1,11 +1,12 @@
 # paseo-dev-team
 
 A ready-made Paseo agent team for taking GitHub work to a
-merge-ready pull request. One command, `/deliver`, accepts an issue or a PR:
+merge-ready pull request. Each role runs on whichever agent and model you
+assign it in Paseo; the repository ships a default preset (Claude and Codex). One command, `/deliver`, accepts an issue or a PR:
 
 - **Issue:** reads it, settles the requirements, plans with a critic, implements
   in a separate worktree, opens a PR, then runs the review loop below.
-- **PR:** two independent reviewers (Codex and Claude) review a frozen
+- **PR:** two independent reviewers (by default on different agents) review a frozen
   candidate, an expert critic triages the findings, a developer fixes accepted
   ones, checks run, and the loop repeats until the PR meets the gates: score at
   or above the target (default 8/10 on the pr-review rubric), no open blockers,
@@ -29,7 +30,7 @@ issue in issue mode) unless you ask.
 
 ### Team
 
-| Profile id | Role | Ships with |
+| Profile id | Role | Default preset |
 |---|---|---|
 | `team-coordinator` | Plans, delegates, integrates, owns Git | Claude Opus 5.5, medium |
 | `team-developer` | Implements changes and tests | Claude Opus 5.5, high |
@@ -38,13 +39,19 @@ issue in issue mode) unless you ask.
 | `team-scout` | Bounded research | Claude Sonnet 5.5, medium |
 | `team-expert` | Critic and expert advice | Claude Opus 5.5, max |
 
-The skills refer to roles by profile id only, so you can change the model of any
-role in Paseo without editing the skills. Updates keep your model choices.
+The skills refer to roles by profile id only and never assume a provider. To
+use other agents, edit a profile in Paseo and pick any provider and model Paseo
+supports (for example Copilot, OpenCode or Pi instead of Claude or Codex), with
+that provider's mode and thinking options. No skill changes are needed, and
+updates keep your choices. Two recommendations: put the two reviewers on
+different agents or models, since independent opinions are the point of having
+two, and give the coordinator an agent that can load skills (see Use).
 
 ## Requirements
 
 - Paseo desktop app, started at least once.
-- Claude and Codex providers signed in inside Paseo.
+- The agent providers your profiles use, signed in inside Paseo (Claude and
+  Codex for the default preset).
 - GitHub CLI signed in: `gh auth login` (the account that will push and comment).
 - Git. Node.js 18+ is used if present; otherwise the installer runs on the
   runtime bundled with the Paseo app.
@@ -77,8 +84,9 @@ there.
 
 The installer:
 
-1. Links `deliver`, `pr-review` and `paseo-team` into `~/.agents/skills` (Codex,
-   Paseo) and `~/.claude/skills` (Claude Code). It never deletes folders,
+1. Links `deliver`, `pr-review` and `paseo-team` into `~/.agents/skills` (the shared
+   skills folder read by Codex and other agents) and `~/.claude/skills` (Claude
+   Code). It never deletes folders,
    and only removes or re-points links it manages (its own, links into another
    paseo-dev-team clone, dangling links with the same name, and a legacy
    `pr-ready` link with `--replace-legacy`).
@@ -125,7 +133,12 @@ work on, then:
 /deliver https://github.com/OWNER/REPO/pull/456 target 9, no-post
 ```
 
-In Codex use `$deliver …`. Plain words work too (`deliver #456`). You can add
+The prefix follows the agent's skill syntax (`/deliver` in Claude Code,
+`$deliver` in Codex). Plain words work too (`deliver #456`). If the
+coordinator's agent does not load skills from these folders, ask it to read
+`skills/deliver/SKILL.md` in this clone and follow it for the given URL.
+Workers receive the paths of the skills they need, so they only need to read
+files. You can add
 run-specific instructions such as `no-post`, `local-only`, `no-push`,
 `target 9`, `base staging` or `ready PR`.
 
@@ -190,9 +203,10 @@ Instructions in the launch override both. All keys are described in
 ## Troubleshooting
 
 - **"profile team-… is missing":** run the installer again, then `paseo reload`.
-- **Skill not found in Claude Code or Codex:** check that
-  `~/.claude/skills/deliver` and `~/.agents/skills/deliver` exist and point into
-  this clone; restart the agent session.
+- **Skill not found:** check that `~/.claude/skills/deliver` and
+  `~/.agents/skills/deliver` exist and point into this clone, and restart the
+  agent session. If your agent reads skills from another folder, link the three
+  skills there or point the agent at `skills/deliver/SKILL.md`.
 - **Installer cannot find a runtime on Linux:** install Node.js or set
   `PASEO_DEV_TEAM_NODE` to a node executable. The Paseo runtime paths probed on
   Linux (`/opt/Paseo/paseo`, `/usr/lib/paseo/paseo`) are guesses.

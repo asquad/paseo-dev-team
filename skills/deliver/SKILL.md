@@ -19,7 +19,8 @@ subagents; do not merely return a list of proposed fixes.
 
 ## Launch
 
-Use `/deliver <issue or PR URL>` (`$deliver` in Codex). Plain
+Use `/deliver <issue or PR URL>`, or the agent's own skill syntax (for
+example `$deliver` in Codex). Plain
 `deliver <URL>` and `#<number>` with an unambiguous repository are also valid.
 
 1. Resolve the target and its type (see Scope). An issue runs

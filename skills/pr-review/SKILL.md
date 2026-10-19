@@ -17,23 +17,25 @@ Make a PR understandable to the next human reviewer, then report concrete defect
 at the relevant lines. Support a first pass and a follow-up against earlier
 findings. A clean review with a useful explanation is a complete result.
 
-Shared by Claude Code and Codex; adapted from `asquad/claude-pr-review` (archived),
-revision `74150e62d05cfcae13b7955d169d425b9e3d302e`. The upstream MIT notice is
-preserved in the repository [LICENSE](../../LICENSE).
+Shared by Claude Code and Codex. Originally developed as the `claude-pr-review`
+Claude Code plugin (last revision `74150e6`), which this skill replaces. The MIT
+notice is in the repository [LICENSE](../../LICENSE).
 
 ## Defaults and authorization
 
 - Input: a GitHub PR URL, or a PR number plus an unambiguous repository. Resolve
   the hostname, owner, repository, and number; retain the hostname for every call.
-- Identity: use `Claude PR Reviewer` when running in Claude Code, `Codex PR Reviewer`
-  when running in Codex, and `AI PR Reviewer` if the agent identity is unavailable.
+- Identity: use `<Agent> PR Reviewer` with the name of the agent you run in (for
+  example `Claude PR Reviewer` in Claude Code, `Codex PR Reviewer` in Codex), and
+  `AI PR Reviewer` if the agent identity is unavailable.
   Include the actual model/version only if trusted session metadata or the user
   supplies it; do not invent it or interrupt the task to ask for one.
 - Language: follow the user's requested review language; otherwise use the team's
   established language from existing reviews, falling back to English. Converse
   with the user in their language. Keep conventional comment labels in English.
-- Delivery: a request to review, including `$pr-review URL` in Codex or
-  `/pr-review URL` in Claude Code, prepares feedback in chat. Explicit requests
+- Delivery: a request to review, including the agent's skill invocation (for
+  example `/pr-review URL` in Claude Code or `$pr-review URL` in Codex), prepares
+  feedback in chat. Explicit requests
   to post, publish, or leave comments on GitHub authorize
   publication for that scope. Honor existing session authorization without asking
   again. A draft-only request stays local.
@@ -58,8 +60,8 @@ list so API limits, missing patches, binaries, and unreadable files are visible.
 Read large text changes in chunks instead of silently skipping files.
 
 Recognize previous runs by the stable `shared-pr-review` marker and the expected
-review author. Also recognize legacy `codex-pr-review` markers and `Codex PR Reviewer`
-or `Claude PR Reviewer` disclosures from that author. Do not treat a quoted identity
+review author. Also recognize legacy `codex-pr-review` markers and `<Agent> PR Reviewer`
+or `AI PR Reviewer` disclosures from that author. Do not treat a quoted identity
 in someone else's reply as a run. A follow-up may continue either agent's review;
 attribute that baseline accurately without claiming authorship of another agent's work.
 
