@@ -1,84 +1,91 @@
 ---
-name: pr-ready
+name: deliver
 description: >-
-  Bring an existing GitHub pull request to merge readiness through an iterative
-  cycle of reviewer, critic, and developer subagents, with short chat reports
-  after every stage. Use for a review/critique/fix loop or to prepare a PR for
-  merging. Runs with the mixed Paseo team and keeps a PR status comment with score.
-  Uses pr-review for reviews. Not for review-only requests, an isolated
-  fix without a readiness loop, or merging a PR.
+  Take a GitHub issue or pull request to a merge-ready PR through an iterative
+  cycle of reviewer, critic and developer subagents on the Paseo team, with
+  short chat reports after every stage. For an issue, plan and implement it,
+  open the PR, then run the same review/fix loop. For a PR, review, critique and
+  fix it until the gates pass. Keeps one PR status comment with the score. Uses
+  pr-review for reviews and paseo-team for roles. Not for review-only requests,
+  an isolated fix without a readiness loop, or merging.
 ---
 
-# PR Ready
+# Deliver
 
-Own the PR until the latest changes are independently reviewed, merge-blocking
-defects are fixed, and merge requirements are verified, or a concrete external blocker
-prevents further progress. Coordinate reviewer, critic, and developer subagents;
-do not merely return a list of proposed fixes.
+Own the task until the latest changes are independently reviewed, merge-blocking
+defects are fixed, and merge requirements are verified, or a concrete external
+blocker prevents further progress. Coordinate reviewer, critic and developer
+subagents; do not merely return a list of proposed fixes.
 
-## One-command Paseo launch
+## Launch
 
-Use `/pr-ready <PR URL>`. Plain `pr-ready <PR URL>` is also a valid
-natural-language invocation. Every launch runs with the mixed Paseo team:
+Use `/deliver <issue or PR URL>` (`$deliver` in Codex). Plain
+`deliver <URL>` and `#<number>` with an unambiguous repository are also valid.
 
-1. Set `Team: mixed` for this task.
-2. Read sibling `../paseo-team/SKILL.md` and use its saved Paseo profiles and
-   delegation interface. Do not require the user to name `paseo-team` or
-   `pr-review` separately; load both dependencies yourself. The coordinator
-   must read `pr-review`, including `references/review-format.md`, and give the
-   resolved skill path to each reviewer.
-3. Use both selected reviewers on the same fixed candidate and the selected
-   Expert as an independent Critic. Developer implements accepted changes;
-   Scout handles bounded investigations. Keep `Team: mixed` in worker
-   prompts. Prefer an isolated worktree for the pipeline.
-4. Use **Mixed / Coordinator — Fable 5.1** as the coordinator. A command does
-   not change an existing session's provider; follow paseo-team's handoff
-   guidance for a confirmed mismatch rather than claiming a provider switch.
-5. Relay every stage result to the user's parent Paseo chat as described below.
+1. Resolve the target and its type (see Scope). An issue runs
+   [references/issue-mode.md](references/issue-mode.md) first and then the PR
+   cycle below on the PR it opens. A PR runs the PR cycle directly.
+2. Resolve the run configuration per
+   [references/config.md](references/config.md). Values named `config.<key>`
+   below come from it.
+3. Read sibling `../paseo-team/SKILL.md` and use its team profiles and
+   delegation rules. Do not require the user to name `paseo-team` or
+   `pr-review`; load both yourself. The coordinator reads `pr-review`, including
+   `references/review-format.md`, and gives the resolved skill path to each
+   reviewer.
+4. Use both reviewers on the same fixed candidate and the Expert as an
+   independent Critic. The Developer implements accepted changes; the Scout
+   handles bounded investigations. Prefer an isolated worktree for the pipeline.
+5. The coordinator runs with the `team-coordinator` profile. A command does not
+   change an existing session's provider or model; for a confirmed mismatch
+   follow paseo-team's handoff guidance rather than claiming a switch.
+6. Relay every stage result to the user's parent Paseo chat as described below.
    Worker transcripts, tool output and the round log are not substitutes.
-6. The user has configured every pr-ready launch to keep one status
-   comment on the target PR: posted at the very start to say the PR is taken
-   into work, edited in place with the current round and stage as the run
-   progresses, and finally overwritten with the result, including completed
-   work and the final score using the pr-review rubric. Follow
-   [references/pr-status-comment.md](references/pr-status-comment.md). This is
-   standing authorization for that single comment and its edits only; do not
-   ask again. Explicit local-only, draft-only or no-post constraints override
-   publication.
+7. With `config.statusComment` (default on), keep one status comment on the
+   target PR: posted when work starts, edited per stage, finally overwritten with
+   the result and the final score. Follow
+   [references/status-comment.md](references/status-comment.md). Installing and
+   launching this skill with that setting is standing authorization for that
+   single comment and its edits only; do not ask again. Explicit local-only,
+   draft-only or no-post instructions override it.
 
-Creating, editing or explaining this command does not launch any live PR task.
+Creating, editing or explaining this skill does not launch any live task.
 
 ## Scope and authorization
 
-- Resolve the PR from its URL, repository and number, or unambiguous current
-  branch. If the target remains ambiguous, ask only for that missing identifier.
-- Follow the user's scope and existing session authorization. A request to bring
-  the PR to readiness includes necessary code fixes, relevant tests, ordinary
-  commits, and updating that PR's source branch when permitted. Respect explicit
-  local-only, no-commit, or no-push constraints. Do not ask again before every
-  round, fix, or already-authorized branch update.
-- Every launch authorizes its status comment as above.
-  Other publication still needs its own authorization. Merging, enabling
-  auto-merge, posting other reviews/comments, replying as the author,
-  resolving GitHub threads, and submitting approvals require authorization for
-  those actions. Review findings circulate internally by default. Preparing the
-  PR does not itself authorize those other actions or changing protection rules.
+- Resolve the target from its URL, repository and number, or an unambiguous
+  current branch. Confirm through the API whether a number is an issue or a PR.
+  If the target remains ambiguous, ask only for that missing identifier.
+- Follow the user's scope and existing session authorization. Bringing a PR to
+  readiness includes necessary code fixes, relevant tests, ordinary commits and
+  updating that PR's source branch. An issue launch additionally authorizes the
+  branch, PR and comments listed in issue-mode.md. Respect explicit local-only,
+  no-commit or no-push constraints. Do not ask again before every round, fix or
+  already-authorized branch update.
+- Other publication still needs its own authorization. Merging, enabling
+  auto-merge, posting other reviews/comments, replying as the author, resolving
+  GitHub threads and submitting approvals require authorization for those
+  actions. Review findings circulate internally by default. Preparing the PR
+  does not authorize those actions or changing protection rules.
 - Preserve unrelated local work. Prefer an isolated worktree if the checkout is
   dirty, belongs to another branch, or is being edited concurrently. Do not
   overwrite another author's remote updates or force-push without authorization.
-- Creating or editing this skill is not an instruction to run it on a live PR.
+- Never retry a GitHub create (comment, PR, issue) on an unverified failure.
+  Treat an error while checking whether the object exists as unknown, not as
+  absent; read back by marker or branch before creating again.
 
 ## Establish one shared baseline
 
 Read the installed `pr-review` skill before starting a review. Discover it from
 the skill catalog, or resolve the sibling `../pr-review/SKILL.md` from this skill's
-directory. The shared personal installation is `~/.agents/skills/pr-review/SKILL.md`.
+directory. The usual installation is `~/.agents/skills/pr-review/SKILL.md`.
 Pass its resolved path to reviewers so they can read its instructions and relevant
 references. If it is missing, search for a moved installation; if unavailable,
 report the missing dependency rather than claiming to have used it.
 
-Post the status comment ("taken into work") as soon as
-the PR target, head and base are resolved, before launching reviewers.
+In PR mode, post the status comment ("taken into work") as soon as the PR
+target, head and base are resolved, before launching reviewers. In issue mode it
+is posted when the PR is opened (issue-mode.md, step 5).
 
 Read applicable repository instructions and capture the PR's hostname, repository,
 number, source branch, remote head SHA, base SHA, full change list, existing review
@@ -100,9 +107,11 @@ Name every item discovered while preparing the PR as
 `R<round>-<source>-<class><number>[-BLOCKER]`, for example `R1-A-F1`, `R1-A-N2`,
 `R1-A-F3-BLOCKER`, or `R2-B-Q1`.
 
-- **Round:** `R1` is the first review of the PR head. Each review of a new frozen
+- **Round:** `R1` is the first review of the PR head (in issue mode, of the
+  first pushed candidate). Each review of a new frozen
   candidate increments it. Items captured in the baseline, such as existing human
-  threads or checks that already fail, use `R0`.
+  threads, checks that already fail or objections raised during issue-mode
+  planning, use `R0`.
 - **Source:** reviewers are `A` and `B` (then `C`, `D` when scopes are split),
   assigned in the baseline and fixed for the whole run. Other sources use whole
   words: `Critic` for a new problem raised during critique, `Scout` for one found
@@ -150,9 +159,9 @@ internal agent messages alone do not count as a chat report.
   paths, tests, and relevant project conventions. Return concrete findings with
   Finding IDs, evidence and calibrated ratings, plus coverage and verification
   limits. They
-  do not edit code or publish reviews. Split a large PR into complementary scopes
-  when useful; one reviewer suffices for a small PR. The coordinator owns complete
-  coverage, including interactions between scopes.
+  do not edit code or publish reviews. For a large PR, complementary scoped
+  reviews (reviewers `C`, `D`) may be added on top of the two full reviews. The
+  coordinator owns complete coverage, including interactions between scopes.
 - **Critics:** Independently inspect the evidence behind each finding and the
   proposed remedy. Look for false positives, misunderstood contracts, unnecessary
   scope growth, and regressions the remedy might introduce. Return `accept`,
@@ -202,8 +211,12 @@ preserve them during integration and branch updates. Respect no-commit constrain
    avoid tests that merely mirror trivial implementation details. Preserve the
    intended product behavior rather than suppressing checks to make them green.
 4. **Run checks.** Run checks appropriate to the integrated changes and required
-   by the repository. Inspect failures and report what actually ran. Fixes for
-   failed checks return to implementation and invalidate affected prior results.
+   by the repository. Before every push run the repository's full set of fast
+   checks (formatter, linter, type check), not only the tests. After the first
+   full local test run, follow `config.followUpTests`: by default later rounds
+   run tests for affected areas only and report the revision of the last full
+   run. Inspect failures and report what actually ran. Fixes for failed checks
+   return to implementation and invalidate affected prior results.
 5. **Re-review.** Mark a finding `fixed-pending-review` after a patch; only
    independent inspection/reproduction at the new candidate can mark it
    `verified-fixed`. Re-review affected behavior and interactions; keep prior
@@ -215,8 +228,11 @@ preserve them during integration and branch updates. Respect no-commit constrain
    remote head, commit task changes as needed, and push the reviewed candidate to
    the verified source branch. If someone has updated it, reconcile their changes
    before proceeding and re-review the integrated result. Verify that the PR head
-   matches the candidate, then inspect required checks for that SHA and current
-   merge requirements. For normally progressing pending CI, wait within the active
+   matches the candidate, then inspect checks for that SHA and current merge
+   requirements. Wait for the checks selected by `config.ci.wait` (for
+   `required`, the checks GitHub marks required, or all checks when none are or
+   that cannot be determined), excluding names matching `config.ci.skipChecks`; report excluded checks as pending or
+   skipped, never as passed. For normally progressing pending CI, wait within the active
    task using bounded calls and short progress reports; do not finish just because
    only CI remains. Pending CI is not success. Any new fix, conflict resolution,
    or material base change invalidates affected review/check evidence and returns
@@ -224,7 +240,7 @@ preserve them during integration and branch updates. Respect no-commit constrain
 
 ## Short chat report after every stage
 
-After baseline capture and after each review, critique/triage, implementation,
+After baseline capture, after each issue-mode stage, and after each review, critique/triage, implementation,
 check run, re-review, and remote PR verification, post a short intermediate report
 in the user's chat language. Use commentary while work continues: one paragraph
 or a flat list of 1-10 points, normally 3-5. Begin with the round and stage. Each
@@ -235,11 +251,16 @@ Use the user's chat language; the GitHub status comment follows pr-review's
 publication language rules. Do not defer all progress reporting to the end.
 Also edit the PR status comment at each stage transition
 with the current round/stage, the last outcome and the next step, as described in
-references/pr-status-comment.md. Skip edits for unchanged polls.
+references/status-comment.md. Skip edits for unchanged polls.
 
 Include the useful evidence for that stage, without pasting raw agent transcripts:
 
-- Baseline: PR/revision, scope, existing blockers, planned role assignments.
+- Baseline: PR/revision, scope, existing blockers, planned role assignments,
+  and effective configuration values that differ from the defaults, with their
+  source.
+- Issue intake, requirements and plan (issue mode): acceptance criteria,
+  open decisions or assumptions, plan verdict from the Critic.
+- PR opened (issue mode): PR link, branch, base, draft state, first candidate.
 - Review/re-review: current score and coverage, new/open/verified finding IDs,
   and the one to three factors behind the verdict.
 - Critique: accepted/rejected/disputed findings and the decisive reasons;
@@ -263,25 +284,26 @@ later or recurring work.
 ## Completion and stopping conditions
 
 Use three gates together: **mergeable review, independent verification, and
-current PR requirements**. The user-selected overall score target is **at least
-8/10**, unless the user explicitly changes it for a run. Calibrate using the
+current PR requirements**. The overall score target is `config.scoreTarget`
+(default **8/10**), unless the user explicitly changes it for a run. Calibrate using the
 installed `pr-review` rubric in `references/review-format.md`: 7-8 means solid and
 mergeable, while 9-10 is rare exemplary work. Its actual scale is 0-10. A score of
-7 meets that rubric's mergeable band but does not meet this workflow's target.
+7 meets that rubric's mergeable band but does not meet the default target.
 Do not optimize for 9 or 10 unless the user explicitly requests a higher target.
 
 The score is a consistency check, not proof by itself. Calibrate from findings
 and evidence before assigning it; never raise a score to end the loop or average
 away a defect across reviewers. Scope-limited scores are provisional; the final
 whole-PR score must assess the complete integrated candidate under the same rubric.
-If that rubric changes, preserve the user's target and satisfy the installed
+If that rubric changes, preserve the configured target and satisfy the installed
 mergeable criteria; report any incompatibility rather than silently lowering the
 target. Below the target, have the reviewer identify evidence-backed improvements
 that justify the remaining score gap. Do not inflate the score or invent defects
 when no justified improvement is available; report that the target remains unmet.
 
 Classify merge blockers from the evidence and project requirements. By default,
-an accepted finding with importance >= 7 and confidence >= 7 blocks merge; so
+an accepted finding with importance >= `config.blocker.importance` and confidence
+>= `config.blocker.confidence` (both 7 by default) blocks merge; so
 does any other confirmed must-fix regardless of its numbers. A credible unresolved
 question that could reveal a blocker requires targeted investigation, not a
 cosmetic score reduction or automatic dismissal. Do not manufacture certainty
@@ -290,7 +312,7 @@ reason. They do not lower an otherwise sound PR below the mergeable band.
 
 End the code loop after **one clean final cycle**: complete independent review
 and critic triage of the same integrated candidate, a non-provisional overall
-score >= 8 (or the user's explicit run-specific target), no open blockers or
+score at or above the target, no open blockers or
 unresolved material uncertainty, all selected
 fixes independently verified, and relevant checks passing. Clean means no
 merge-blocking findings, not necessarily zero comments. A reviewer who implemented
@@ -327,7 +349,7 @@ completion. Honor explicit user budgets; reaching a budget is an incomplete resu
 not readiness. Keep the round log sufficient to resume after a context reset.
 
 Overwrite the status comment with the final result
-described in references/pr-status-comment.md before ending, including a truthful
+described in references/status-comment.md before ending, including a truthful
 blocked outcome when the run cannot reach readiness; never leave it in progress.
 If publication is prohibited by a run constraint or fails, retain the prepared
 summary and report that fact; do not claim it was posted or continue code

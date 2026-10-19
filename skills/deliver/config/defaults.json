@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "statusComment": true,
+  "scoreTarget": 8,
+  "blocker": {
+    "importance": 7,
+    "confidence": 7
+  },
+  "maxActiveWorkers": 2,
+  "reviewLanguage": "auto",
+  "ci": {
+    "wait": "required",
+    "skipChecks": []
+  },
+  "followUpTests": "affected",
+  "issue": {
+    "baseBranch": "repo-default",
+    "prState": "draft",
+    "markReadyWhenDone": true,
+    "planCritique": true,
+    "linkComment": true
+  }
+}
