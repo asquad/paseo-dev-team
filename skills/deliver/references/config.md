@@ -46,6 +46,7 @@ and ignored.
 | `issue.markReadyWhenDone` | `true` | Mark the draft ready for review once the code gates pass. |
 | `issue.planCritique` | `true` | Send the implementation plan to the Critic before development. |
 | `issue.linkComment` | `true` | Post one short comment on the issue linking the new PR. |
+| `workspace.title` | `Deliver #{number} ({summary})` | Name of the Paseo workspace for the run. Placeholders: `{number}` (issue or PR number of the launch target), `{summary}` (3-6 word description of it), `{kind}` (`PR` or `Issue`), `{repo}` (repository name). |
 
 ## Example user file
 
