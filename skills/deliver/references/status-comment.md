@@ -1,18 +1,20 @@
 # PR status comment
 
-This procedure applies to every pr-ready launch. The user has requested one
-comment on the target PR per run: it announces at the start that the PR is taken
-into work, shows the current progress while the run continues, and is finally
-overwritten with the result. Honor explicit no-post, local-only or draft-only
-constraints.
+This procedure applies to every deliver run with `config.statusComment` enabled
+(the default). The run keeps one comment on the target PR: it announces at the
+start that the PR is taken into work, shows the current progress while the run
+continues, and is finally overwritten with the result. Honor explicit no-post,
+local-only or draft-only constraints. In issue mode the target PR is the one the
+run opens.
 
 The run has exactly one such comment. Every later publication edits it in place;
 do not post additional progress or summary comments.
 
 ## Language and marker
 
-Use the review language requested by the user, otherwise the PR team's existing
-review language, falling back to English. Keep this language for the whole
+Use the review language requested by the user, otherwise `config.reviewLanguage`
+when it is not `auto`, otherwise the PR team's existing review language, falling
+back to English. Keep this language for the whole
 lifecycle of the comment.
 
 Generate a run ID once and retain it in the round log. Start every body version
@@ -20,20 +22,24 @@ with an HTML marker carrying the actual values (no placeholders; use `-` for a
 value not yet known, such as the candidate before the first fix):
 
 ```html
-<!-- pr-ready-status:v1 run=RUN_ID team=mixed state=STATE head=PR_HEAD_SHA candidate=CANDIDATE_SHA base=BASE_SHA -->
+<!-- deliver-status:v1 run=RUN_ID source=SOURCE state=STATE head=PR_HEAD_SHA candidate=CANDIDATE_SHA base=BASE_SHA -->
 ```
 
 `STATE` is `in-progress` while the run continues and `final` for the result.
-Reuse the same run ID for retries and resumed work.
+`SOURCE` is `pr` or `issue-<number>`. Reuse the same run ID for retries and
+resumed work. Comments with the older `pr-ready-status:v1` marker come from the
+previous name of this skill; recognize them when resuming a run started before
+the rename, and use the new marker for new runs.
 
 ## 1. Taken into work (start of the run)
 
-Publish the comment as the first GitHub action of the run, right after the PR
-target, head and base are resolved and before reviewers are launched. Keep it
+In PR mode, publish the comment as the first GitHub action of the run, right
+after the PR target, head and base are resolved and before reviewers are
+launched. In issue mode, publish it right after the PR is opened. Keep it
 short:
 
-- Generated-text disclosure and that the PR is taken into work by the pr-ready
-  pipeline with the mixed team.
+- Generated-text disclosure and that the PR is taken into work by the deliver
+  pipeline (paseo-dev-team), naming the issue in issue mode.
 - The PR head being worked on and the start time (UTC).
 - A **Current stage** line, initially the baseline.
 - That this comment will be updated with progress and replaced with the result.
@@ -75,13 +81,18 @@ Include:
 
 1. Generated-text disclosure and a short explanation of the final PR behavior.
 2. **Score: N/10**, with the 1-3 observed factors behind it and any scope limits.
+   When local test runs replaced or supplemented unavailable CI, put a
+   **Local tests:** passed/failed line with a small suite | passed | failed |
+   skipped table right after the score, naming environment-only failures.
+   In issue mode, add which acceptance criteria are covered and by which tests.
 3. **Work completed:** the meaningful fixes made during this run, with finding
    IDs in the SKILL.md Finding IDs format (for example `R1-A-F3-BLOCKER`) and
    commit-pinned links where useful. Distinguish existing PR changes
    from work performed by this pipeline. State when no code fixes were needed.
 4. **Verification and coverage:** actual local checks, both independent review
    results, Critic triage and CI for the named PR revision. Distinguish passed,
-   failed, pending, skipped and unavailable checks.
+   failed, pending, skipped and unavailable checks; checks excluded by
+   `config.ci.skipChecks` are listed as not awaited.
 5. **Remaining issues / review focus:** confirmed blockers, relevant optional
    observations, missing approvals or other external requirements.
 6. **Final status and revisions:** ready to merge, code ready but externally
@@ -122,7 +133,8 @@ Recovery: on resume or after an ambiguous network result, look up this run's
 marker among the PR comments (including pagination) from the authenticated
 posting account before creating anything. If it exists, continue editing it. If
 the comment was deleted, create a new one with the current state and log the new
-ID. Never edit another author's comment or a different run's comment.
+ID. If the lookup itself fails, the state is unknown: do not create a comment
+until a lookup succeeds. Never edit another author's comment or a different run's comment.
 
 After the final edit, read the comment back and verify its author, marker
 (`state=final`), body and PR target. Finish in the Paseo chat with a concise

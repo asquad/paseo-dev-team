@@ -1,0 +1,4 @@
+interface:
+  display_name: "Deliver"
+  short_description: "Take an issue or PR to a merge-ready PR with an agent team"
+  default_prompt: "Use $deliver to take this issue or PR to a merge-ready pull request through planner, developer, reviewer and critic subagents, with a short report after every stage."
