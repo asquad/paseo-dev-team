@@ -9,7 +9,7 @@
   "maxActiveWorkers": 2,
   "reviewLanguage": "auto",
   "workspace": {
-    "title": "Deliver #{number} ({summary})"
+    "title": "Deliver {repo_name} #{number} ({summary})"
   },
   "ci": {
     "wait": "required",
