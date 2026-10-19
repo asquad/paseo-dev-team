@@ -14,7 +14,8 @@
 - Folded operational rules into the skills: CI check filters, affected-only
   follow-up tests, local test results in the summary, waiting inside the
   coordinator turn, safe GitHub create retries.
-- Removed the Codex-only team preset.
+- Removed the Codex-only team preset. Claude and Codex are only the default
+  preset: any provider Paseo supports can be assigned to any role.
 - Added cross-platform installer with update, uninstall and legacy migration.
   It refuses to run from a clone inside a skills folder, so upgrading from
   `pr-ready` starts from a fresh clone.
