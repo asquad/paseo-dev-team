@@ -8,6 +8,9 @@
   },
   "maxActiveWorkers": 2,
   "reviewLanguage": "auto",
+  "workspace": {
+    "title": "Deliver #{number} ({summary})"
+  },
   "ci": {
     "wait": "required",
     "skipChecks": []
