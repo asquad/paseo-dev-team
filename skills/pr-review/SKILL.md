@@ -17,9 +17,9 @@ Make a PR understandable to the next human reviewer, then report concrete defect
 at the relevant lines. Support a first pass and a follow-up against earlier
 findings. A clean review with a useful explanation is a complete result.
 
-Shared by Claude Code and Codex; adapted from `asquad/claude-pr-review` (archived),
-revision `74150e62d05cfcae13b7955d169d425b9e3d302e`. The upstream MIT notice is
-preserved in the repository [LICENSE](../../LICENSE).
+Shared by Claude Code and Codex. Originally developed as the `claude-pr-review`
+Claude Code plugin (last revision `74150e6`), which this skill replaces. The MIT
+notice is in the repository [LICENSE](../../LICENSE).
 
 ## Defaults and authorization
 
