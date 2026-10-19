@@ -1,6 +1,6 @@
 # paseo-dev-team
 
-A ready-made Paseo agent team for taking GitHub work to a
+A ready-made [Paseo](https://github.com/getpaseo/paseo) agent team for taking GitHub work to a
 merge-ready pull request. Each role runs on whichever agent and model you
 assign it in Paseo; the repository ships a default preset (Claude and Codex). One command, `/deliver`, accepts an issue or a PR:
 
