@@ -17,6 +17,50 @@ comment on the PR that ends with the final score and result. It never merges
 or approves, and posts no other comments (apart from a link comment on the
 issue in issue mode) unless you ask.
 
+## How it works
+
+```mermaid
+flowchart TD
+    start(["/deliver &lt;issue or PR URL&gt;"]) --> kind{"Issue or PR?"}
+
+    kind -->|Issue| intake["Intake: read the issue,<br/>look for existing PRs and branches"]
+    intake --> existing{"Open PR for<br/>this issue?"}
+    existing -->|"yes, yours"| baseline
+    existing -->|"yes, someone else's"| ask(["Stop and ask"])
+    existing -->|no| access{"Push access?"}
+    access -->|no| ask
+    access -->|yes| clear{"Requirements<br/>clear?"}
+    clear -->|no| ask
+    clear -->|yes| plan["Plan; the Critic reviews it"]
+    plan --> implement["Developer implements in a worktree,<br/>fast checks pass"]
+    implement --> open["Open a draft PR (Closes #N),<br/>status comment, link on the issue"]
+    open --> review
+
+    kind -->|PR| baseline["Baseline: head, base, threads, checks;<br/>post the status comment"]
+    baseline --> review
+
+    subgraph loop ["Review loop (each pass is a round R1, R2, ...)"]
+        review["Reviewer A and Reviewer B review<br/>the same frozen candidate independently"]
+        review --> critique["Critic triages every finding:<br/>accept / reject / needs evidence"]
+        critique --> gates{"Score at or above target,<br/>no open blockers,<br/>fixes verified?"}
+        gates -->|no| fix["Developer fixes accepted findings"]
+        fix --> checks["Local checks"]
+        checks --> review
+    end
+
+    gates -->|yes| push["Push the candidate, wait for CI"]
+    push --> ci{"CI green?"}
+    ci -->|no| fix
+    ci -->|yes| markready["Mark the draft ready (issue mode)"]
+    markready --> merge{"Approvals and<br/>merge rules met?"}
+    merge -->|yes| ready(["Ready to merge:<br/>final status comment"])
+    merge -->|no| blocked(["Code ready, blocked by ...:<br/>final status comment"])
+```
+
+Every stage ends with a short report in the Paseo chat, and the status comment
+on the PR shows the current round and stage. The coordinator never merges; a
+human decides.
+
 ## What is included
 
 | Path | Purpose |
