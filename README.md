@@ -199,6 +199,7 @@ Instructions in the launch override both. All keys are described in
 | `issue.markReadyWhenDone` | `true` | Mark the draft ready when the gates pass. |
 | `issue.planCritique` | `true` | Critic reviews the plan before coding. |
 | `issue.linkComment` | `true` | Comment on the issue with the PR link. |
+| `workspace.title` | `Deliver #{number} ({summary})` | Paseo workspace name; also `{kind}`, `{repo}`. |
 
 ## Troubleshooting
 

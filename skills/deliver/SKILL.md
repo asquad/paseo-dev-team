@@ -37,12 +37,22 @@ example `$deliver` in Codex). Plain
 4. Use both reviewers on the same fixed candidate and the Expert as an
    independent Critic. The Developer implements accepted changes; the Scout
    handles bounded investigations. Prefer an isolated worktree for the pipeline.
-5. The coordinator runs with the `team-coordinator` profile. A command does not
+5. Name the Paseo workspace of the run from `config.workspace.title` (default
+   `Deliver #{number} ({summary})`). `{number}` is the number of the launch
+   target, the issue in issue mode, and stays the same for the whole run.
+   `{summary}` is a short description of that issue or PR in 3-6 words, written
+   in the language of its title, without the number. When the coordinator
+   creates a workspace for the run, pass the name as its `title`. When the run
+   uses the coordinator's current workspace and that workspace was created for
+   this run, rename it with `rename_workspace`. Do not rename a workspace that
+   other agents or tasks share; create a dedicated one instead. Without Paseo
+   workspace tools, skip naming and say so in the baseline report.
+6. The coordinator runs with the `team-coordinator` profile. A command does not
    change an existing session's provider or model; for a confirmed mismatch
    follow paseo-team's handoff guidance rather than claiming a switch.
-6. Relay every stage result to the user's parent Paseo chat as described below.
+7. Relay every stage result to the user's parent Paseo chat as described below.
    Worker transcripts, tool output and the round log are not substitutes.
-7. With `config.statusComment` (default on), keep one status comment on the
+8. With `config.statusComment` (default on), keep one status comment on the
    target PR: posted when work starts, edited per stage, finally overwritten with
    the result and the final score. Follow
    [references/status-comment.md](references/status-comment.md). Installing and
