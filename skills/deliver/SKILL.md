@@ -46,13 +46,17 @@ example `$deliver` in Codex). Plain
    a short description of the target in 3-6 words, written in the language of
    its title, without the number or repository name; for several targets it
    describes them together. Use exactly this name, without extra words.
-   - Rename the coordinator's own workspace with `rename_workspace` (omit
-     `workspaceId`). Paseo titles a new workspace from the launch prompt, and
-     this is the workspace the user sees for the run. Skip the rename only when
-     `list_agents` shows agents in that workspace that are not part of this
-     run, and say so in the baseline report.
+   - The agent that received the `/deliver` request renames its own workspace
+     with `rename_workspace` (omit `workspaceId`) first, before anything else.
+     This also applies when it only prepares the run and hands it to a
+     coordinator in another workspace: Paseo titled its workspace from the
+     launch prompt, and that is the workspace the user watches. Skip the
+     rename only when `list_agents` shows agents in that workspace that are
+     not part of this run, and say so in the report.
+   - A coordinator started in another workspace renames that workspace the
+     same way if it does not already carry the name.
    - Pass the same name as `title` to every workspace the run creates, such
-     as a worktree workspace.
+     as a worktree workspace, and include it in the coordinator's assignment.
    - Without Paseo workspace tools, skip naming and say so in the baseline
      report.
 6. The coordinator runs with the `team-coordinator` profile. A command does not
