@@ -38,8 +38,9 @@ example `$deliver` in Codex). Plain
    independent Critic. The Developer implements accepted changes; the Scout
    handles bounded investigations. Prefer an isolated worktree for the pipeline.
 5. Name the Paseo workspaces of the run from `config.workspace.title`
-   (default `Deliver #{number} ({summary})`) as soon as the target is
-   resolved, before launching any worker. `{number}` is the number of the
+   (default `Deliver {repo_name} #{number} ({summary})`) as soon as the target
+   is resolved, before launching any worker. `{repo_name}` is the repository
+   name without the owner, for example `web-app`. `{number}` is the number of the
    launch target, the issue in issue mode, and stays the same for the whole
    run; for several targets in one run list them as `#57, #58`. `{summary}` is
    a short description of the target in 3-6 words, written in the language of
