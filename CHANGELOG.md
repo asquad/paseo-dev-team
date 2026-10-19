@@ -3,9 +3,10 @@
 ## Unreleased
 
 - The Paseo workspace of a run is named from `workspace.title`, by default
-  `Deliver <repo> #<number> (<short summary>)`. The coordinator renames its own
-  workspace, which Paseo titles from the launch prompt, and gives the same name
-  to workspaces it creates.
+  `Deliver <repo> #<number> (<short summary>)`. The agent that receives `/deliver`
+  renames its own workspace, which Paseo titles from the launch prompt, even
+  when it hands the run to a coordinator elsewhere; every workspace the run
+  creates gets the same name.
 - Renamed the repository from `pr-ready` to `paseo-dev-team` and the skill
   from `pr-ready` to `deliver`.
 - `deliver` accepts an issue: intake, requirements check, critic-reviewed plan,
