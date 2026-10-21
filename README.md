@@ -42,11 +42,21 @@ coordinator never merges; a human decides.
 | Path | Purpose |
 |---|---|
 | `skills/deliver` | The `/deliver` workflow (issue or PR → merge-ready PR). |
+| `skills/intake` | `/intake <description>`: free-form task → draft issues in the right repositories → `/deliver` on each after you confirm. |
 | `skills/pr-review` | PR review with a calibrated 0-10 score and inline findings. Also usable alone: `/pr-review <PR URL>`. |
 | `skills/paseo-team` | Team roles and how to launch them in Paseo. |
 | `profiles/team.json` | The six Paseo agent profiles the team uses. |
 | `paseo/orchestration-prompt.md` | Team conventions added to Paseo's system prompt. |
 | `skills/deliver/config/defaults.json` | Default settings; override them personally or per repository. |
+
+## Optional: Agent board
+
+The separate Agent board Paseo plugin (`asquad/paseo-agent-board`) shows the
+agents of every repository under a workspace folder on one screen. When this
+team is installed, it also follows `/deliver` runs (round, stage, score,
+blocker) and can start them. It reads the run state file each run keeps in
+`~/.paseo-dev-team/runs` (`skills/deliver/references/run-state.md`). The team
+works the same without the plugin.
 
 ### Team
 
@@ -152,6 +162,19 @@ work on, then:
 /deliver https://github.com/OWNER/REPO/pull/456
 /deliver https://github.com/OWNER/REPO/pull/456 target 9, no-post
 ```
+
+To start from a description instead of an issue, run `/intake` from the
+folder that holds all related repositories:
+
+```text
+/intake Expose the obstacle API over REST and teach the MCP server to use it
+```
+
+It maps the work to repositories, extends matching open issues instead of
+duplicating them, publishes new issues with the `draft` label and stops. Check
+or edit them on GitHub, then reply `confirm` (or name the issues to confirm,
+change or cancel). Intake removes the label and starts `/deliver` on each
+confirmed issue. Add `auto` to skip the stop.
 
 The prefix follows the agent's skill syntax (`/deliver` in Claude Code,
 `$deliver` in Codex). Plain words work too (`deliver #456`). If the

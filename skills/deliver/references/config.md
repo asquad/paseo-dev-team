@@ -46,6 +46,10 @@ and ignored.
 | `issue.markReadyWhenDone` | `true` | Mark the draft ready for review once the code gates pass. |
 | `issue.planCritique` | `true` | Send the implementation plan to the Critic before development. |
 | `issue.linkComment` | `true` | Post one short comment on the issue linking the new PR. |
+| `intake.draftLabel` | `draft` | Label intake puts on the issues it creates until the user confirms them. Deliver stops and asks before working on an issue that still carries it. |
+| `intake.maxIssues` | `5` | Maximum new issues per intake run. |
+| `intake.planCritique` | `true` | The Expert critiques the intake split before publication. |
+| `intake.launch` | `deliver` | After confirmation intake starts deliver per issue (`deliver`) or only removes the draft label (`none`). |
 | `workspace.title` | `Deliver {repo_name} #{number} ({summary})` | Name of the coordinator's workspace and of every workspace the run creates. Placeholders: `{number}` (issue or PR number of the launch target; several as `#57, #58`), `{summary}` (3-6 word description of it), `{kind}` (`PR` or `Issue`), `{repo_name}` (repository name without the owner, e.g. `Omni-Kit`). |
 
 ## Example user file

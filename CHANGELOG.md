@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Added the `intake` skill: a free-form description becomes draft issues in
+  the right repositories (existing issues are extended, not duplicated); after
+  confirmation the draft label is removed and `/deliver` starts on each.
+  Deliver stops on an issue that still has the draft label.
+- `deliver` keeps a local run state file in `~/.paseo-dev-team/runs` for every
+  run (`references/run-state.md`), read by the optional Agent board plugin.
 - The Paseo workspace of a run is named from `workspace.title`, by default
   `Deliver <repo> #<number> (<short summary>)`. The agent that receives `/deliver`
   renames its own workspace, which Paseo titles from the launch prompt, even

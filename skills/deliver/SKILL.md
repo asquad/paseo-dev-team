@@ -71,6 +71,10 @@ example `$deliver` in Codex). Plain
    launching this skill with that setting is standing authorization for that
    single comment and its edits only; do not ask again. Explicit local-only,
    draft-only or no-post instructions override it.
+9. Keep the local run state file described in
+   [references/run-state.md](references/run-state.md) current in every run,
+   including no-post and local-only runs. Optional tools such as the Agent
+   board plugin read it.
 
 Creating, editing or explaining this skill does not launch any live task.
 
@@ -274,7 +278,8 @@ Use the user's chat language; the GitHub status comment follows pr-review's
 publication language rules. Do not defer all progress reporting to the end.
 Also edit the PR status comment at each stage transition
 with the current round/stage, the last outcome and the next step, as described in
-references/status-comment.md. Skip edits for unchanged polls.
+references/status-comment.md, and rewrite the run state file
+(references/run-state.md). Skip edits for unchanged polls.
 
 Include the useful evidence for that stage, without pasting raw agent transcripts:
 
@@ -374,6 +379,7 @@ not readiness. Keep the round log sufficient to resume after a context reset.
 Overwrite the status comment with the final result
 described in references/status-comment.md before ending, including a truthful
 blocked outcome when the run cannot reach readiness; never leave it in progress.
+Write the run state file with `state: "final"` and the same result.
 If publication is prohibited by a run constraint or fails, retain the prepared
 summary and report that fact; do not claim it was posted or continue code
 changes just to retry publication.
