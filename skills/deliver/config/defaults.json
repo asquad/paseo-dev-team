@@ -22,5 +22,11 @@
     "markReadyWhenDone": true,
     "planCritique": true,
     "linkComment": true
+  },
+  "intake": {
+    "draftLabel": "draft",
+    "maxIssues": 5,
+    "planCritique": true,
+    "launch": "deliver"
   }
 }
