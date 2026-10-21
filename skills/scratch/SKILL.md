@@ -1,5 +1,5 @@
 ---
-name: intake
+name: scratch
 description: >-
   Turn a free-form task description into GitHub issues across the repositories
   of a multi-repository workspace, publish them as drafts, and after the user
@@ -9,7 +9,7 @@ description: >-
   existing issue or PR (use deliver), review-only requests, or merging.
 ---
 
-# Intake
+# Scratch
 
 Turn the user's description into well-formed issues in the right repositories,
 publish them with the draft label, wait for the user's confirmation, then hand
@@ -18,7 +18,7 @@ deliver runs it starts own everything after that.
 
 ## Launch
 
-`/intake <description>` (`$intake` in Codex). The description is free text and
+`/scratch <description>` (`$scratch` in Codex). The description is free text and
 may span several components. Launch it from the workspace root that contains
 the repositories (for example the folder of all related checkouts) so the run
 can inspect every component; a launch from a single repository limits the run
@@ -32,27 +32,27 @@ Creating, editing or explaining this skill does not launch any live task.
 
 Resolve the configuration exactly like deliver,
 [../deliver/references/config.md](../deliver/references/config.md), and use
-its `intake.*` keys:
+its `scratch.*` keys:
 
 | Key | Default | Meaning |
 |---|---|---|
-| `intake.draftLabel` | `draft` | Label put on every issue the run creates until the user confirms it. |
-| `intake.maxIssues` | `5` | Maximum new issues per run. A larger split stops and asks first. |
-| `intake.planCritique` | `true` | The Expert critiques the split before publication. |
-| `intake.launch` | `deliver` | After confirmation: `deliver` starts a deliver coordinator per confirmed issue; `none` only removes the draft label. |
-| `workspace.title` | as deliver | The intake workspace is named `Intake ({summary})`. |
+| `scratch.draftLabel` | `draft` | Label put on every issue the run creates until the user confirms it. |
+| `scratch.maxIssues` | `5` | Maximum new issues per run. A larger split stops and asks first. |
+| `scratch.planCritique` | `true` | The Expert critiques the split before publication. |
+| `scratch.launch` | `deliver` | After confirmation: `deliver` starts a deliver coordinator per confirmed issue; `none` only removes the draft label. |
+| `workspace.title` | as deliver | The scratch workspace is named `Scratch ({summary})`. |
 
 ## Scope and authorization
 
-Launching intake authorizes, for this run only:
+Launching scratch authorizes, for this run only:
 
 - creating the draft label in a target repository when it is missing;
-- creating up to `intake.maxIssues` new issues and editing the issues it
+- creating up to `scratch.maxIssues` new issues and editing the issues it
   created (body, title, labels, cross-links);
 - one comment per existing issue it extends (step 3);
 - removing the draft label from issues it created once the user confirms them;
 - closing issues it created as not planned when the user cancels them;
-- starting deliver coordinators on confirmed issues (`intake.launch`).
+- starting deliver coordinators on confirmed issues (`scratch.launch`).
 
 It does not authorize editing other people's issue bodies or labels, closing
 issues it did not create, assigning people, or anything deliver itself needs
@@ -65,11 +65,11 @@ SKILL.md).
 Report every stage in the chat in the user's language, as deliver does, and
 keep the run state file current
 ([../deliver/references/run-state.md](../deliver/references/run-state.md),
-`kind: "intake"`).
+`kind: "scratch"`).
 
 ### 0. Start
 
-Rename the workspace you were launched in to `Intake ({summary})` with
+Rename the workspace you were launched in to `Scratch ({summary})` with
 `rename_workspace`, unless `list_agents` shows unrelated agents there. Write
 the first run state with `state: "in-progress"` and `startedAt`.
 
@@ -98,7 +98,7 @@ Search open issues and recently closed ones in each target repository for the
 same work (`gh search issues`, titles, labels, linked PRs). For each part:
 
 - an open issue already covers it: extend it with one comment headed
-  `Additional requirements (intake)` that lists only what is new, and record it
+  `Additional requirements (scratch)` that lists only what is new, and record it
   as `role: "appended"`; do not change its body or labels;
 - an open PR already implements it: note it and do not create an issue; the
   user can deliver on that PR;
@@ -119,13 +119,13 @@ umbrella variants). In particular:
 - the assumptions from step 1 and open decisions are stated;
 - links to the other issues of this run (`Depends on owner/repo#N`,
   `Blocks …`) and to existing issues or PRs found in step 3;
-- the hidden marker `<!-- intake:v1 run=RUN_ID -->` is the last line.
+- the hidden marker `<!-- scratch:v1 run=RUN_ID -->` is the last line.
 
 When the run creates several issues for one outcome, also create an umbrella
 issue in the repository that owns the main change, with the `## Plan` of the
 format, unless an existing issue already plays that role.
 
-With `intake.planCritique`, send the split, the drafts and the dependencies to
+With `scratch.planCritique`, send the split, the drafts and the dependencies to
 the Expert as Critic before publishing. It checks repository ownership,
 duplicates, missing consumers, criteria that cannot be verified, and splits
 that are too fine or too coarse. Resolve objections by evidence, as in deliver
@@ -134,7 +134,7 @@ triage.
 ### 5. Publish as drafts
 
 For each repository, make sure the draft label exists (`gh label create
-<label> --color BFD4F2 --description "Created by intake; awaiting
+<label> --color BFD4F2 --description "Created by scratch; awaiting
 confirmation"` when missing). Create the issues with the label, in dependency
 order, recording each number immediately in the run state (`state: "draft"`).
 Then edit the bodies to fill in the cross-links whose numbers are now known.
@@ -166,7 +166,7 @@ of the run awaits a decision.
 ### 7. Start delivery
 
 For each confirmed issue: remove the draft label (only from issues this run
-created) and set its `state` to `confirmed`. With `intake.launch: deliver`,
+created) and set its `state` to `confirmed`. With `scratch.launch: deliver`,
 start one deliver coordinator per confirmed issue, in dependency order:
 
 - Profile `team-coordinator` (read paseo-team), working directory the same

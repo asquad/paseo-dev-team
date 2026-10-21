@@ -1,0 +1,4 @@
+interface:
+  display_name: "Scratch"
+  short_description: "Turn a task description into draft issues, then deliver them"
+  default_prompt: "Use $scratch to turn this description into GitHub issues in the right repositories, publish them as drafts, and after my confirmation start $deliver on each."

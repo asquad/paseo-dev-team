@@ -24,7 +24,7 @@ templates and applies to every repository of the workspace.
   feature request, `bug` for a defect.
 - Existing area labels that clearly apply (for example `ui`, `api`,
   `security`). Read the repository's label list; never invent a label, except
-  the intake draft label.
+  the scratch draft label.
 - Do not add release-note labels (`changelog/*`), milestones or assignees: the
   team decides those.
 
@@ -69,7 +69,7 @@ Decide before implementing:
   branch link, and names the commit it was checked against.
 - **Proposal** may give a sketch of the API or behaviour; leave implementation
   detail to the PR unless it constrains the design.
-- **Acceptance criteria** are required for intake issues; deliver plans from
+- **Acceptance criteria** are required for scratch issues; deliver plans from
   them.
 - **Decide before implementing** lists open product, contract or security
   decisions with a recommendation; omit it when there are none.
@@ -114,7 +114,7 @@ line per PR: its issue or PR number, its future PR title in
 conventional-commit form, and what it depends on. Decisions the plan waits for
 are listed as `D1`, `D2` … and referenced from the plan lines.
 
-## Intake marker
+## Scratch marker
 
-End every issue intake creates with its hidden run marker on the last line:
-`<!-- intake:v1 run=RUN_ID -->`.
+End every issue scratch creates with its hidden run marker on the last line:
+`<!-- scratch:v1 run=RUN_ID -->`.

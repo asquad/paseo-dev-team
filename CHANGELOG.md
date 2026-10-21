@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Added the `intake` skill: a free-form description becomes draft issues in
+- Added the `scratch` skill: a free-form description becomes draft issues in
   the right repositories (existing issues are extended, not duplicated); after
   confirmation the draft label is removed and `/deliver` starts on each.
   Deliver stops on an issue that still has the draft label.

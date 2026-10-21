@@ -42,7 +42,7 @@ coordinator never merges; a human decides.
 | Path | Purpose |
 |---|---|
 | `skills/deliver` | The `/deliver` workflow (issue or PR → merge-ready PR). |
-| `skills/intake` | `/intake <description>`: free-form task → draft issues in the right repositories → `/deliver` on each after you confirm. |
+| `skills/scratch` | `/scratch <description>`: free-form task → draft issues in the right repositories → `/deliver` on each after you confirm. |
 | `skills/pr-review` | PR review with a calibrated 0-10 score and inline findings. Also usable alone: `/pr-review <PR URL>`. |
 | `skills/paseo-team` | Team roles and how to launch them in Paseo. |
 | `profiles/team.json` | The six Paseo agent profiles the team uses. |
@@ -163,17 +163,17 @@ work on, then:
 /deliver https://github.com/OWNER/REPO/pull/456 target 9, no-post
 ```
 
-To start from a description instead of an issue, run `/intake` from the
+To start from a description instead of an issue, run `/scratch` from the
 folder that holds all related repositories:
 
 ```text
-/intake Add CSV export to the reports API and a download button in the web app
+/scratch Add CSV export to the reports API and a download button in the web app
 ```
 
 It maps the work to repositories, extends matching open issues instead of
 duplicating them, publishes new issues with the `draft` label and stops. Check
 or edit them on GitHub, then reply `confirm` (or name the issues to confirm,
-change or cancel). Intake removes the label and starts `/deliver` on each
+change or cancel). Scratch removes the label and starts `/deliver` on each
 confirmed issue. Add `auto` to skip the stop.
 
 The prefix follows the agent's skill syntax (`/deliver` in Claude Code,
