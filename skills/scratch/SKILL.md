@@ -170,7 +170,10 @@ created) and set its `state` to `confirmed`. With `scratch.launch: deliver`,
 start one deliver coordinator per confirmed issue, in dependency order:
 
 - Profile `team-coordinator` (read paseo-team), working directory the same
-  workspace root this run was launched from.
+  workspace root this run was launched from, and agent title
+  `Deliver {repo_name} #{number}`. Paseo records these coordinators as your
+  subagents; they are independent runs, so never archive or stop them when
+  this run ends or is cleaned up.
 - Initial prompt: the deliver command and the issue URL, plus the
   pass-through run instructions and, for a dependent issue, one line naming
   the issues it depends on and their current PRs, for example
