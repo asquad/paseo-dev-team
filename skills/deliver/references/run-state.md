@@ -1,6 +1,6 @@
 # Run state file
 
-Every deliver and intake run keeps one local JSON file that describes its
+Every deliver and scratch run keeps one local JSON file that describes its
 current state. Tools such as the optional Agent board Paseo plugin read these
 files to show the stage, score, blockers and created issues of each run next to
 its agents. The file is local bookkeeping, not publication: write it in every
@@ -16,7 +16,7 @@ rename it over the old file, so a reader never sees a partial file.
 
 ## When to write
 
-- First right after the target is resolved (intake: right after launch),
+- First right after the target is resolved (scratch: right after launch),
   before launching any worker.
 - At every stage transition that edits the status comment
   ([status-comment.md](status-comment.md)), and at every chat stage report.
@@ -56,19 +56,19 @@ A deliver run:
 }
 ```
 
-An intake run uses the same fields with `kind: "intake"`, `repo`, `number` and
+A scratch run uses the same fields with `kind: "scratch"`, `repo`, `number` and
 `pr` set to `null`, and lists the issues it touched in `children`:
 
 ```json
 {
   "version": 1,
-  "runId": "intake-20261020-1405-1",
+  "runId": "scratch-20261020-1405-1",
   "repo": null,
-  "kind": "intake",
+  "kind": "scratch",
   "number": null,
   "pr": null,
   "title": "CSV export for reports",
-  "workspaceTitle": "Intake (CSV export for reports)",
+  "workspaceTitle": "Scratch (CSV export for reports)",
   "coordinatorAgentId": "6a7b8c9d-1e2f-4a3b-8c4d-5e6f7a8b9c0d",
   "worktree": null,
   "state": "blocked",
@@ -103,23 +103,23 @@ An intake run uses the same fields with `kind: "intake"`, `repo`, `number` and
 |---|---|
 | `version` | Always `1`. |
 | `runId` | The run ID. Also the file name. |
-| `repo` | `owner/name` of the target repository; `null` for intake. |
-| `kind` | `pr` or `issue` (the deliver launch target), or `intake`. |
-| `number` | Number of the launch target (the issue in issue mode); `null` for intake. |
+| `repo` | `owner/name` of the target repository; `null` for scratch. |
+| `kind` | `pr` or `issue` (the deliver launch target), or `scratch`. |
+| `number` | Number of the launch target (the issue in issue mode); `null` for scratch. |
 | `pr` | PR number once known, otherwise `null`. |
 | `title` | The workspace `{summary}`: 3-6 words describing the target. |
 | `workspaceTitle` | The exact Paseo workspace name of the run. |
 | `coordinatorAgentId` | The coordinator's Paseo agent ID, from the `PASEO_AGENT_ID` environment variable; `null` when unavailable. |
 | `worktree` | Path of the run's worktree, or `null`. |
 | `state` | `in-progress` while the run works or waits for CI, `blocked` while it waits for the user or an external requirement and cannot continue on its own, `final` when it ended. |
-| `round`, `stage` | The current round number (`0` for the baseline; `null` for intake) and a short stage description, as in the chat reports. |
+| `round`, `stage` | The current round number (`0` for the baseline; `null` for scratch) and a short stage description, as in the chat reports. |
 | `lastCompleted`, `next` | One line each, as in the status comment. |
 | `score`, `scoreTarget` | Latest whole-PR review score (`null` before the first review) and the configured target. Never write a provisional score as final. |
-| `result` | For `state: "final"`: `ready to merge`, `code ready; blocked by …`, `local candidate ready; PR not updated` or `incomplete`; for intake a short summary such as `3 issues confirmed, deliver started`. Otherwise `null`. |
+| `result` | For `state: "final"`: `ready to merge`, `code ready; blocked by …`, `local candidate ready; PR not updated` or `incomplete`; for scratch a short summary such as `3 issues confirmed, deliver started`. Otherwise `null`. |
 | `blocker` | The external requirement the run waits for, for example `approval` or `required check X failing`; otherwise `null`. |
 | `needsUser` | The question or decision the run is waiting for from the user; otherwise `null`. Set `state: "blocked"` with it. |
 | `statusCommentUrl` | The status comment URL once posted, otherwise `null`. |
-| `children` | Intake only: the issues the run created or appended to. `role` is `created` or `appended`; `state` is `draft`, `confirmed`, `delivering` or `cancelled`; `dependsOn` lists `owner/repo#N` keys; `deliverAgentId` is the deliver coordinator started for it. |
+| `children` | Scratch only: the issues the run created or appended to. `role` is `created` or `appended`; `state` is `draft`, `confirmed`, `delivering` or `cancelled`; `dependsOn` lists `owner/repo#N` keys; `deliverAgentId` is the deliver coordinator started for it. |
 | `startedAt` | UTC time the run was launched, ISO 8601. Set once and keep it. |
 | `updatedAt` | UTC time of this write, ISO 8601. |
 
