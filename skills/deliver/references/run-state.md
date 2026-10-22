@@ -14,6 +14,11 @@ same way when no comment is posted. Create the folder when it is missing. Write
 the whole file each time: write to `<run-id>.json.tmp` in the same folder, then
 rename it over the old file, so a reader never sees a partial file.
 
+Produce the content with a JSON serializer (`ConvertTo-Json` in PowerShell,
+`json.dump` in Python, `JSON.stringify` in Node), never by writing the text by
+hand: Windows paths and other values with backslashes or quotes must be
+escaped (`"D:\\work\\repo"`), and a hand-written file breaks readers.
+
 ## When to write
 
 - First right after the target is resolved (scratch: right after launch),
