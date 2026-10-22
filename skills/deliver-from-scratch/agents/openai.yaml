@@ -1,0 +1,4 @@
+interface:
+  display_name: "Deliver from scratch"
+  short_description: "Turn a task description into issues, confirm them, then deliver each"
+  default_prompt: "Use $deliver-from-scratch to turn this description into GitHub issues in the right repositories, confirm them with me, then start $deliver on each confirmed issue."

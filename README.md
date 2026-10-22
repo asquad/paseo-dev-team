@@ -43,6 +43,7 @@ coordinator never merges; a human decides.
 |---|---|
 | `skills/deliver` | The `/deliver` workflow (issue or PR → merge-ready PR). |
 | `skills/scratch` | `/scratch <description>`: free-form task → issues in the right repositories, for you to review and hand to `/deliver`. |
+| `skills/deliver-from-scratch` | `/deliver-from-scratch <description>`: `/scratch`, then your confirmation, then `/deliver` on each confirmed issue. |
 | `skills/pr-review` | PR review with a calibrated 0-10 score and inline findings. Also usable alone: `/pr-review <PR URL>`. |
 | `skills/paseo-team` | Team roles and how to launch them in Paseo. |
 | `profiles/team.json` | The six Paseo agent profiles the team uses. |
@@ -175,6 +176,12 @@ duplicating them, publishes the new issues and ends. It never starts work
 itself. Review or edit the issues on GitHub (or ask the same chat for
 changes), then run `/deliver` on the ones you want. The optional Agent board
 plugin lists them and starts delivery with one button.
+
+To do all of it in one chat, use `/deliver-from-scratch` with the same kind of
+description. It runs the scratch steps, stops for your `confirm` (or names of
+issues to confirm, change or cancel), then starts `/deliver` on each confirmed
+issue in dependency order. Instructions such as `target 9` or `no-post` pass
+through to the deliver runs; `auto` skips the stop.
 
 The prefix follows the agent's skill syntax (`/deliver` in Claude Code,
 `$deliver` in Codex). Plain words work too (`deliver #456`). If the
