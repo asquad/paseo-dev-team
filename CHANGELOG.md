@@ -5,6 +5,8 @@
 - Added the `scratch` skill: a free-form description becomes issues in the
   right repositories (existing issues are extended, not duplicated) for the
   user to review; it does not start delivery.
+- Added the `deliver-from-scratch` skill: scratch, then the user's
+  confirmation, then `/deliver` on each confirmed issue.
 - `deliver` keeps a local run state file in `~/.paseo-dev-team/runs` for every
   run (`references/run-state.md`), read by the optional Agent board plugin.
 - The Paseo workspace of a run is named from `workspace.title`, by default
