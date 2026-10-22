@@ -2,19 +2,20 @@
 name: scratch
 description: >-
   Turn a free-form task description into GitHub issues across the repositories
-  of a multi-repository workspace, publish them as drafts, and after the user
-  confirms, start /deliver on each. Finds existing issues to extend instead of
-  duplicating them and links dependent issues. Use when the user describes
+  of a multi-repository workspace and publish them as drafts for the user to
+  review. Finds existing issues to extend instead of duplicating them and links
+  dependent issues. Does not start any work on them. Use when the user describes
   work in their own words rather than pointing at an issue or PR. Not for an
-  existing issue or PR (use deliver), review-only requests, or merging.
+  existing issue or PR (use deliver), implementing anything, or merging.
 ---
 
 # Scratch
 
-Turn the user's description into well-formed issues in the right repositories,
-publish them with the draft label, wait for the user's confirmation, then hand
-each confirmed issue to `/deliver`. The run owns the issues it creates; the
-deliver runs it starts own everything after that.
+Turn the user's description into well-formed issues in the right repositories
+and publish them with the draft label. That is the whole run: it never removes
+the draft label, never starts `/deliver` and never writes code. The user
+reviews the drafts and decides what goes to work, by removing the label and
+running `/deliver` themselves or through a tool such as the Agent board plugin.
 
 ## Launch
 
@@ -22,9 +23,7 @@ deliver runs it starts own everything after that.
 may span several components. Launch it from the workspace root that contains
 the repositories (for example the folder of all related checkouts) so the run
 can inspect every component; a launch from a single repository limits the run
-to that repository. Run-specific instructions in the text pass through to the
-deliver runs (for example `target 9`, `no-post`, `base staging`), plus
-`auto` to skip the confirmation stop (step 6).
+to that repository.
 
 Creating, editing or explaining this skill does not launch any live task.
 
@@ -36,10 +35,9 @@ its `scratch.*` keys:
 
 | Key | Default | Meaning |
 |---|---|---|
-| `scratch.draftLabel` | `draft` | Label put on every issue the run creates until the user confirms it. |
+| `scratch.draftLabel` | `draft` | Label put on every issue the run creates. It marks the issue as not reviewed yet; deliver does not start on it while the label is there. |
 | `scratch.maxIssues` | `5` | Maximum new issues per run. A larger split stops and asks first. |
 | `scratch.planCritique` | `true` | The Expert critiques the split before publication. |
-| `scratch.launch` | `deliver` | After confirmation: `deliver` starts a deliver coordinator per confirmed issue; `none` only removes the draft label. |
 | `workspace.title` | as deliver | The scratch workspace is named `Scratch ({summary})`. |
 
 ## Scope and authorization
@@ -50,13 +48,11 @@ Launching scratch authorizes, for this run only:
 - creating up to `scratch.maxIssues` new issues and editing the issues it
   created (body, title, labels, cross-links);
 - one comment per existing issue it extends (step 3);
-- removing the draft label from issues it created once the user confirms them;
-- closing issues it created as not planned when the user cancels them;
-- starting deliver coordinators on confirmed issues (`scratch.launch`).
+- later edits to the issues it created when the user asks for changes (step 7).
 
-It does not authorize editing other people's issue bodies or labels, closing
-issues it did not create, assigning people, or anything deliver itself needs
-separate authorization for. Never retry a GitHub create on an unverified
+It does not authorize removing the draft label, starting deliver or any other
+agent work on the issues, closing issues, editing other people's issue bodies
+or labels, or assigning people. Never retry a GitHub create on an unverified
 failure: look the object up by its run marker first (as in deliver's
 SKILL.md).
 
@@ -135,58 +131,28 @@ triage.
 
 For each repository, make sure the draft label exists (`gh label create
 <label> --color BFD4F2 --description "Created by scratch; awaiting
-confirmation"` when missing). Create the issues with the label, in dependency
+review"` when missing). Create the issues with the label, in dependency
 order, recording each number immediately in the run state (`state: "draft"`).
 Then edit the bodies to fill in the cross-links whose numbers are now known.
 Post the comments for appended issues.
 
-### 6. Confirm
+### 6. Finish
 
-Unless the launch said `auto`, stop with `state: "blocked"` and `needsUser`
-set, and report in the chat: a table of the issues (repository, number, title,
-created or appended, dependencies) with links, and the replies you accept:
+Write the final run state (`state: "final"`, `result` such as
+`3 issues published as drafts, 1 extended`, every issue in `children` with
+`state: "draft"`) and end with a short report: a table of the issues
+(repository, number, title, created or extended, dependencies) as Markdown
+links, the order in which they can be delivered, and the open decisions the
+user should settle while reviewing.
 
-- **confirm** (all, or a list of numbers);
-- **change** requests: edit the issues accordingly, report, stay blocked;
-- **cancel** (all, or a list): close the created issues as not planned, remove
-  the appended comments only if the user asks.
+Do not wait for a reply and do not remove the draft label.
 
-The user may also edit the issues on GitHub before confirming; re-read them
-before step 7. Do not proceed on silence.
+### 7. Change requests
 
-Decisions can also arrive from the Agent board plugin as messages that start
-with "The user approved these issues on the Agent board", "The user rejected"
-or "Change requests for the draft issues". The board has already done what the
-message says (removed the draft label and started deliver, or closed the issue).
-Do not repeat those GitHub actions or start deliver for those issues again:
-record each one in the run state (`delivering` with its `deliverAgentId`, or
-`cancelled`), apply change requests as above, and go to step 8 once no issue
-of the run awaits a decision.
-
-### 7. Start delivery
-
-For each confirmed issue: remove the draft label (only from issues this run
-created) and set its `state` to `confirmed`. With `scratch.launch: deliver`,
-start one deliver coordinator per confirmed issue, in dependency order:
-
-- Profile `team-coordinator` (read paseo-team), working directory the same
-  workspace root this run was launched from, and agent title
-  `Deliver {repo_name} #{number}`. Paseo records these coordinators as your
-  subagents; they are independent runs, so never archive or stop them when
-  this run ends or is cleaned up.
-- Initial prompt: the deliver command and the issue URL, plus the
-  pass-through run instructions and, for a dependent issue, one line naming
-  the issues it depends on and their current PRs, for example
-  `/deliver https://github.com/OWNER/REPO/issues/41 target 9. Depends on
-  OWNER/OTHER#12 (PR #15).`
-- Record each `deliverAgentId` and set `state: "delivering"`.
-
-Appended issues are delivered the same way when the user confirms them; their
-labels are left alone. Do not wait for the deliver runs; they report on their
-own.
-
-### 8. Finish
-
-Write the final run state (`state: "final"`, `result` summarising confirmed,
-cancelled and started issues) and end with a short report: the issues with
-links, which deliver runs were started, and anything left in draft.
+The user may come back to this chat, or send a message through the Agent
+board starting with "Change requests for the draft issues", to change the
+split or the wording. Re-read the issues first (the user may have edited them
+on GitHub), apply the requested changes to the issues this run created or
+extended, update the run state (`updatedAt`, `lastCompleted`) and report what
+changed. Requests to start work are out of scope: point the user to removing
+the draft label and running `/deliver`, or to the Agent board.

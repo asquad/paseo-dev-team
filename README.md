@@ -42,7 +42,7 @@ coordinator never merges; a human decides.
 | Path | Purpose |
 |---|---|
 | `skills/deliver` | The `/deliver` workflow (issue or PR → merge-ready PR). |
-| `skills/scratch` | `/scratch <description>`: free-form task → draft issues in the right repositories → `/deliver` on each after you confirm. |
+| `skills/scratch` | `/scratch <description>`: free-form task → draft issues in the right repositories, for you to review and hand to `/deliver`. |
 | `skills/pr-review` | PR review with a calibrated 0-10 score and inline findings. Also usable alone: `/pr-review <PR URL>`. |
 | `skills/paseo-team` | Team roles and how to launch them in Paseo. |
 | `profiles/team.json` | The six Paseo agent profiles the team uses. |
@@ -171,10 +171,10 @@ folder that holds all related repositories:
 ```
 
 It maps the work to repositories, extends matching open issues instead of
-duplicating them, publishes new issues with the `draft` label and stops. Check
-or edit them on GitHub, then reply `confirm` (or name the issues to confirm,
-change or cancel). Scratch removes the label and starts `/deliver` on each
-confirmed issue. Add `auto` to skip the stop.
+duplicating them, publishes new issues with the `draft` label and ends. It
+never starts work itself. Review or edit the issues on GitHub (or ask the
+same chat for changes), then remove the `draft` label and run `/deliver` on
+the ones you want. The optional Agent board plugin does both with one button.
 
 The prefix follows the agent's skill syntax (`/deliver` in Claude Code,
 `$deliver` in Codex). Plain words work too (`deliver #456`). If the
