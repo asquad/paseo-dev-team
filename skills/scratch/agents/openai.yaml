@@ -1,0 +1,4 @@
+interface:
+  display_name: "Scratch"
+  short_description: "Turn a task description into issues for review"
+  default_prompt: "Use $scratch to turn this description into GitHub issues in the right repositories, and publish them for me to review."

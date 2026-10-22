@@ -46,6 +46,8 @@ and ignored.
 | `issue.markReadyWhenDone` | `true` | Mark the draft ready for review once the code gates pass. |
 | `issue.planCritique` | `true` | Send the implementation plan to the Critic before development. |
 | `issue.linkComment` | `true` | Post one short comment on the issue linking the new PR. |
+| `scratch.maxIssues` | `5` | Maximum new issues per scratch run. |
+| `scratch.planCritique` | `true` | The Expert critiques the scratch split before publication. |
 | `workspace.title` | `Deliver {repo_name} #{number} ({summary})` | Name of the coordinator's workspace and of every workspace the run creates. Placeholders: `{number}` (issue or PR number of the launch target; several as `#57, #58`), `{summary}` (3-6 word description of it), `{kind}` (`PR` or `Issue`), `{repo_name}` (repository name without the owner, e.g. `web-app`). |
 
 ## Example user file
