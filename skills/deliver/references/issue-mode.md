@@ -36,9 +36,6 @@ Everything listed as needing separate authorization in `SKILL.md` still does.
   not fork or push to another remote without the user's explicit approval.
 - If the issue is closed, or assigned to someone else with recent activity,
   stop and ask.
-- If the issue carries the `scratch.draftLabel` label, it has not been
-  confirmed yet: stop and ask whether to confirm it (remove the label) or
-  wait.
 - Record the base branch (`issue.baseBranch`) and its SHA.
 
 ## 2. Requirements
