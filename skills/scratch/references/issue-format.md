@@ -23,8 +23,7 @@ templates and applies to every repository of the workspace.
 - A type label as the repository's templates set it: `enhancement` for a
   feature request, `bug` for a defect.
 - Existing area labels that clearly apply (for example `ui`, `api`,
-  `security`). Read the repository's label list; never invent a label, except
-  the scratch draft label.
+  `security`). Read the repository's label list; never invent a label.
 - Do not add release-note labels (`changelog/*`), milestones or assignees: the
   team decides those.
 

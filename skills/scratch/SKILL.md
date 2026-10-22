@@ -2,8 +2,7 @@
 name: scratch
 description: >-
   Turn a free-form task description into GitHub issues across the repositories
-  of a multi-repository workspace and publish them as drafts for the user to
-  review. Finds existing issues to extend instead of duplicating them and links
+  of a multi-repository workspace and publish them for the user to review. Finds existing issues to extend instead of duplicating them and links
   dependent issues. Does not start any work on them. Use when the user describes
   work in their own words rather than pointing at an issue or PR. Not for an
   existing issue or PR (use deliver), implementing anything, or merging.
@@ -12,10 +11,10 @@ description: >-
 # Scratch
 
 Turn the user's description into well-formed issues in the right repositories
-and publish them with the draft label. That is the whole run: it never removes
-the draft label, never starts `/deliver` and never writes code. The user
-reviews the drafts and decides what goes to work, by removing the label and
-running `/deliver` themselves or through a tool such as the Agent board plugin.
+and publish them. That is the whole run: it never starts `/deliver` or any
+other work on them and never writes code. The user reviews the issues and
+decides what goes to work, by running `/deliver` themselves or through a tool
+such as the Agent board plugin.
 
 ## Launch
 
@@ -35,7 +34,6 @@ its `scratch.*` keys:
 
 | Key | Default | Meaning |
 |---|---|---|
-| `scratch.draftLabel` | `draft` | Label put on every issue the run creates. It marks the issue as not reviewed yet; deliver does not start on it while the label is there. |
 | `scratch.maxIssues` | `5` | Maximum new issues per run. A larger split stops and asks first. |
 | `scratch.planCritique` | `true` | The Expert critiques the split before publication. |
 | `workspace.title` | as deliver | The scratch workspace is named `Scratch ({summary})`. |
@@ -44,14 +42,12 @@ its `scratch.*` keys:
 
 Launching scratch authorizes, for this run only:
 
-- creating the draft label in a target repository when it is missing;
 - creating up to `scratch.maxIssues` new issues and editing the issues it
   created (body, title, labels, cross-links);
 - one comment per existing issue it extends (step 3);
 - later edits to the issues it created when the user asks for changes (step 7).
 
-It does not authorize removing the draft label, starting deliver or any other
-agent work on the issues, closing issues, editing other people's issue bodies
+It does not authorize starting deliver or any other agent work on the issues, closing issues, editing other people's issue bodies
 or labels, or assigning people. Never retry a GitHub create on an unverified
 failure: look the object up by its run marker first (as in deliver's
 SKILL.md).
@@ -127,32 +123,30 @@ duplicates, missing consumers, criteria that cannot be verified, and splits
 that are too fine or too coarse. Resolve objections by evidence, as in deliver
 triage.
 
-### 5. Publish as drafts
+### 5. Publish
 
-For each repository, make sure the draft label exists (`gh label create
-<label> --color BFD4F2 --description "Created by scratch; awaiting
-review"` when missing). Create the issues with the label, in dependency
-order, recording each number immediately in the run state (`state: "draft"`).
+Create the issues in dependency order, recording each number immediately in
+the run state (`state: "published"`).
 Then edit the bodies to fill in the cross-links whose numbers are now known.
 Post the comments for appended issues.
 
 ### 6. Finish
 
 Write the final run state (`state: "final"`, `result` such as
-`3 issues published as drafts, 1 extended`, every issue in `children` with
-`state: "draft"`) and end with a short report: a table of the issues
+`3 issues published, 1 extended`, every issue in `children` with
+`state: "published"`) and end with a short report: a table of the issues
 (repository, number, title, created or extended, dependencies) as Markdown
 links, the order in which they can be delivered, and the open decisions the
 user should settle while reviewing.
 
-Do not wait for a reply and do not remove the draft label.
+Do not wait for a reply and do not start any work on the issues.
 
 ### 7. Change requests
 
 The user may come back to this chat, or send a message through the Agent
-board starting with "Change requests for the draft issues", to change the
+board starting with "Change requests for the issues", to change the
 split or the wording. Re-read the issues first (the user may have edited them
 on GitHub), apply the requested changes to the issues this run created or
 extended, update the run state (`updatedAt`, `lastCompleted`) and report what
-changed. Requests to start work are out of scope: point the user to removing
-the draft label and running `/deliver`, or to the Agent board.
+changed. Requests to start work are out of scope: point the user to running
+`/deliver`, or to the Agent board.

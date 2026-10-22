@@ -74,11 +74,11 @@ A scratch run uses the same fields with `kind: "scratch"`, `repo`, `number` and
   "state": "final",
   "round": null,
   "stage": "published",
-  "lastCompleted": "Published 2 draft issues, appended 1 existing issue",
-  "next": "The user reviews the drafts and starts delivery",
+  "lastCompleted": "Published 2 issues, appended 1 existing issue",
+  "next": "The user reviews the issues and starts delivery",
   "score": null,
   "scoreTarget": null,
-  "result": "2 issues published as drafts, 1 extended",
+  "result": "2 issues published, 1 extended",
   "blocker": null,
   "needsUser": null,
   "statusCommentUrl": null,
@@ -89,7 +89,7 @@ A scratch run uses the same fields with `kind: "scratch"`, `repo`, `number` and
       "url": "https://github.com/acme/reports-api/issues/41",
       "title": "Stream report rows as CSV",
       "role": "created",
-      "state": "draft",
+      "state": "published",
       "dependsOn": [],
       "deliverAgentId": null
     }
@@ -115,11 +115,11 @@ A scratch run uses the same fields with `kind: "scratch"`, `repo`, `number` and
 | `round`, `stage` | The current round number (`0` for the baseline; `null` for scratch) and a short stage description, as in the chat reports. |
 | `lastCompleted`, `next` | One line each, as in the status comment. |
 | `score`, `scoreTarget` | Latest whole-PR review score (`null` before the first review) and the configured target. Never write a provisional score as final. |
-| `result` | For `state: "final"`: `ready to merge`, `code ready; blocked by …`, `local candidate ready; PR not updated` or `incomplete`; for scratch a short summary such as `3 issues published as drafts`. Otherwise `null`. |
+| `result` | For `state: "final"`: `ready to merge`, `code ready; blocked by …`, `local candidate ready; PR not updated` or `incomplete`; for scratch a short summary such as `3 issues published`. Otherwise `null`. |
 | `blocker` | The external requirement the run waits for, for example `approval` or `required check X failing`; otherwise `null`. |
 | `needsUser` | The question or decision the run is waiting for from the user; otherwise `null`. Set `state: "blocked"` with it. |
 | `statusCommentUrl` | The status comment URL once posted, otherwise `null`. |
-| `children` | Scratch only: the issues the run created or appended to. `role` is `created` or `appended`; `state` is `draft` as published (tools that start delivery may record `delivering` or `cancelled`); `dependsOn` lists `owner/repo#N` keys; `deliverAgentId` is the deliver coordinator a tool started for it, `null` from scratch itself. |
+| `children` | Scratch only: the issues the run created or appended to. `role` is `created` or `appended`; `state` is `published` (tools that start delivery may record `delivering` or `cancelled`); `dependsOn` lists `owner/repo#N` keys; `deliverAgentId` is the deliver coordinator a tool started for it, `null` from scratch itself. |
 | `startedAt` | UTC time the run was launched, ISO 8601. Set once and keep it. |
 | `updatedAt` | UTC time of this write, ISO 8601. |
 

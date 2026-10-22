@@ -24,7 +24,6 @@
     "linkComment": true
   },
   "scratch": {
-    "draftLabel": "draft",
     "maxIssues": 5,
     "planCritique": true
   }

@@ -2,10 +2,9 @@
 
 ## Unreleased
 
-- Added the `scratch` skill: a free-form description becomes draft issues in
-  the right repositories (existing issues are extended, not duplicated) for
-  the user to review; it does not start delivery. Deliver stops on an issue
-  that still has the draft label.
+- Added the `scratch` skill: a free-form description becomes issues in the
+  right repositories (existing issues are extended, not duplicated) for the
+  user to review; it does not start delivery.
 - `deliver` keeps a local run state file in `~/.paseo-dev-team/runs` for every
   run (`references/run-state.md`), read by the optional Agent board plugin.
 - The Paseo workspace of a run is named from `workspace.title`, by default
