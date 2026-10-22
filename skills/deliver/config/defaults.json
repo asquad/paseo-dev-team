@@ -22,5 +22,9 @@
     "markReadyWhenDone": true,
     "planCritique": true,
     "linkComment": true
+  },
+  "scratch": {
+    "maxIssues": 5,
+    "planCritique": true
   }
 }
